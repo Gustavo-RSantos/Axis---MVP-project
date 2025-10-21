@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles/registro.css">
+
+    <script src="../components/header.js" type="text/javascript" defer></script>
+
+    <title>Axis Registro</title>
+
+</head>
+<body>
+    <header-component></header-component>
+    <div class="container">
+        <div class="forms-section">
+            <div class="forms-header">
+                <h1>Cadastro</h1>
+            </div>
+            <div class="divider"></div>
+            <div class="forms-content">
+                <form>
+                    <div>
+                        <input class="input" type="nomeUsuario" id="nomeUsuario" placeholder="Usuário">
+                        <input class="input" type="idade" id="idade" placeholder="Idade">
+                    </div>
+                    <input class="input" type="email" id="email" placeholder="E-mail">
+                    <div>
+                        <input class="input" type="firstName" id="firstName" placeholder="Nome">
+                        <input class="input" type="lastName" id="lastName" placeholder="Sobrenome">
+                    </div>
+                    <div class="genero-section espacamento">
+                        <div>
+                            <label for="genero">Gênero: </label>
+                            <select name="genero" id="genero">
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                                <option value="PrefNaoIdentificar">Prefiro não identificar</option>
+                            </select>
+                        </div>
+                        <input class="input" type="tel" id="numeroTelefone" placeholder="(00) 0 0000-0000">
+                    </div>
+                    <div>
+                        <input class="input" type="password" id="senha" placeholder="Senha">
+                        <input class="input" type="password" id="confirmarSenha" placeholder="Confirmar Senha">
+                    </div>
+
+                    <button class="btn-submit" type="submit">Confirmar</button>
+                    
+                    <div class="entrarConta">
+                        <p>Já tem conta? </p>
+                        <a href="./Login.html" class="btn-entrar"><strong>Entrar</strong></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
