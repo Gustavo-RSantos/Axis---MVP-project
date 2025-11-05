@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/*  VARIÁVEIS E BASE */
+:root {
+  --primary: #00a0a6;
+  --secondary: #2E5266;
+  --light: #EFF2F1;
+  --gray: #e4e4e4;
+  --text: #222;
+  --max-width: 1100px;
+
+}
+
+body {
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  color: var(--text);
+  /* background: var(--light); */
+  line-height: 1.6;
+}
