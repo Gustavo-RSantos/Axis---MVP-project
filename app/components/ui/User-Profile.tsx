@@ -1,21 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { logoutUser } from "../../lib/authClient";
 import iconTeste from "@/app/assets/iconePadrao.webp"
+import { useRouter } from "next/navigation";
 
 
 export default function UserProfile() {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
 
+  const [userProfile, setUserProfile] = useState({
+      user_id: 0,
+      user_name: '',
+      user_image: null as Blob | null
+  });
+  
+  useEffect(() => {
+        const fetchUserData = async () => {
+          try {
+            const response = await fetch("/api/navBar", {
+              method: "GET",
+              credentials: "include",
+            });
+  
+            const userProfile = await response.json();
+  
+            if (userProfile.success) {
+  
+              let imageBlob: Blob | null = null;
+              if (userProfile.user_image && Array.isArray(userProfile.user_image)) {
+                const byteArray = new Uint8Array(userProfile.user_image);  // Converte array de bytes para Uint8Array
+                imageBlob = new Blob([byteArray], { type: 'image/jpeg' });  // Ajuste mimeType
+              }
+  
+               setUserProfile({
+                user_id: userProfile.user_id,
+                user_name: userProfile.user_name,
+                user_image: imageBlob
+             });
+            } else {
+              console.error("Erro ao carregar dados:", userProfile.message);
+            }
+          } catch (error) {
+            console.error("Erro na requisição:", error);
+          }
+        };
+        fetchUserData();
+      }, []);
+
+  const router = useRouter();
+
     const handleLogout = async () => {
         await logoutUser();
-       
-        window.location.reload();  
         
+       setTimeout(() => {
+          alert('Logout realizado! Redirecionando...');  // Ou use uma biblioteca de toast
+          router.replace('/');
+        }, 2000);
+    
         setDropdownOpen(false)
   };
 
+  const name = "Axis #" + userProfile.user_id
+  
   return (
     <div className="relative inline-block text-white">
       <button
@@ -23,13 +70,13 @@ export default function UserProfile() {
         className="flex items-center space-x-2 cursor-pointer focus:outline-none"
       >
         <Image
-          src={iconTeste} 
+          src={userProfile.user_image || iconTeste} 
           alt="Icone de perfil"
           width={100}
           height={100}
           className="w-8 h-8 rounded-full object-cover"
         />
-        <span className="font-medium select-none">Usuario Teste</span>
+        <span className="font-medium select-none">{userProfile?.user_name ?? name}</span>
         <svg
           className={`w-4 h-4 transform transition-transform duration-200 ${
             isDropdownOpen ? "rotate-180" : "rotate-0"

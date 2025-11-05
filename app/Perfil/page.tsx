@@ -1,25 +1,60 @@
 "use client"
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CalendarCheck } from 'lucide-react';
 
 import Card_Exames from "../components/ui/Card_Exames"
 import Card_Artigos from '../components/ui/Card_Artigos';
 import { ProfileCard } from '../components/ui/ProfileCard';
-import perfilTeste from "../assets/iconePadrao.webp"
 import testeArtigos from "../assets/banner-tester.png"
 import Link from 'next/link';
 
 export default function Perfil(){
 
-    const [userData] = useState({
-    name: 'Maria Silva',
-    age: 32,
-    city: 'São Paulo, SP',
-    profession: 'Engenheira de Software',
-    imageUrl: perfilTeste.src,
-  });
+  const [userData, setUserData] = useState({
+    user_firstName: '',
+    user_secondName: '',
+    user_mail: '',
+    user_age: 0,
+    user_image: null as Blob | null
+  })
+
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch("/api/user", {
+            method: "GET",
+            credentials: "include",
+          });
+
+          const userData = await response.json();
+          console.log(userData)
+
+          if (userData.success) {
+
+            let imageBlob: Blob | null = null;
+            if (userData.user_image && Array.isArray(userData.user_image)) {
+              const byteArray = new Uint8Array(userData.user_image);  // Converte array de bytes para Uint8Array
+              imageBlob = new Blob([byteArray], { type: 'image/jpeg' });  // Ajuste mimeType
+            }
+
+             setUserData({
+              user_firstName: userData.user_firstName || '',
+              user_secondName: userData.user_secondName || '',
+              user_mail: userData.user_mail || '',
+              user_age: userData.user_age || 0,
+              user_image: imageBlob
+           });
+          } else {
+            console.error("Erro ao carregar dados:", userData.message);
+          }
+        } catch (error) {
+          console.error("Erro na requisição:", error);
+        }
+      };
+      fetchUserData();
+    }, []);
 
   const [exams] = useState([
     {
@@ -78,7 +113,13 @@ export default function Perfil(){
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Section */}
         <div className="mb-8">
-          <ProfileCard {...userData} />
+          <ProfileCard 
+            firstName = {userData.user_firstName}
+            lastName = {userData.user_secondName}
+            email = {userData.user_mail}
+            age = {userData.user_age}
+            imageUrl = {userData.user_image}
+          />
         </div>
 
         {/* Exams Section */}
@@ -124,7 +165,6 @@ export default function Perfil(){
 
         {/* Footer Links */}
         <footer className="border-t border-gray-200 pt-8">
-          
         </footer>
       </main>
     </div>

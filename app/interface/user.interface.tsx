@@ -6,3 +6,11 @@ firstName: string;
   idade: string;
   password: string;
 }
+
+export interface dataUpdateProps {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  idade: string | null;
+  userName: string | null;
+}

@@ -1,13 +1,64 @@
-import { Mail, Settings, Key  } from 'lucide-react';
+import { Mail, Settings, Key, User } from 'lucide-react';
+import imageBase from "../../assets/iconePadrao.webp"
 import Image from 'next/image';
 
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/Dialog';
+import Label from '../../components/ui/Label';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+import { useState } from 'react';
+
 interface ProfileCardProps {
-  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   age: number;
-  imageUrl: string;
+  imageUrl: Blob | null;
 }
 
-export function ProfileCard({ name, age, imageUrl }: ProfileCardProps) {
+interface UserProfile {
+  user_name: string;
+  user_firstname: string;
+  user_lastname: string;
+  user_age: number;
+}
+
+export function ProfileCard({ firstName, lastName, email, age, imageUrl }: ProfileCardProps) {
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    user_name: "joao_silva",
+    user_firstname: firstName,
+    user_lastname: lastName,
+    user_age: age,
+  });
+
+  const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
+
+  const handleOpenModal = () => {
+    setEditedProfile(userProfile);
+    setShowProfileModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowProfileModal(false);
+    setEditedProfile(userProfile);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditedProfile((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setUserProfile(editedProfile);
+    setShowProfileModal(false);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="md:flex">
@@ -16,7 +67,7 @@ export function ProfileCard({ name, age, imageUrl }: ProfileCardProps) {
           <Image
             width={100}
             height={100}
-            src={imageUrl}
+            src={imageUrl || imageBase}
             alt="Foto de perfil"
             className="w-full h-64 md:h-full object-cover"
           />
@@ -24,7 +75,7 @@ export function ProfileCard({ name, age, imageUrl }: ProfileCardProps) {
 
         {/* Profile Info */}
         <div className="p-6 md:p-8 flex-1">
-          <h2 className="text-gray-900 mb-2">{name}</h2>
+          <h2 className="text-gray-900 mb-2">{firstName} {lastName}</h2>
           
           <div className="flex flex-wrap items-center gap-4 mb-4 text-gray-600">
             <div className="flex items-center gap-2">
@@ -37,11 +88,12 @@ export function ProfileCard({ name, age, imageUrl }: ProfileCardProps) {
               <Mail className="w-4 h-4" />
               <span>Email Cadastrado:</span>
             </div>
-            <p className="text-gray-600 ml-6">teste@gmail.com</p>
+            <p className="text-gray-600 ml-6">{email}</p>
           </div>
           <div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button  
+                onClick={handleOpenModal}
                 className="cursor-pointer inline-flex items-center justify-center gap-2 text-teal-600 hover:text-teal-700 transition-colors px-4 py-2 rounded-lg hover:bg-teal-50"
               >
                 <Settings className="w-4 h-4" />
@@ -57,6 +109,107 @@ export function ProfileCard({ name, age, imageUrl }: ProfileCardProps) {
           </div>
         </div>
       </div>
+
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="bg-white/95 backdrop-blur-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-linear-to-br from-teal-100 to-cyan-100 rounded-full">
+                <User className="h-5 w-5 text-teal-600" />
+              </div>
+              Editar Perfil
+            </DialogTitle>
+            <DialogDescription>
+              Atualize suas informações pessoais. Clique em salvar quando
+              terminar.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="user_name" className="text-slate-700">
+                  Usuário
+                </Label>
+                <Input
+                  id="user_name"
+                  type="text"
+                  name="user_name"
+                  value={editedProfile.user_name}
+                  onChange={handleChange}
+                  placeholder="Digite seu nome de usuário..."
+                  className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="user_firstname" className="text-slate-700">
+                  Primeiro Nome
+                </Label>
+                <Input
+                  id="user_firstname"
+                  type="text"
+                  name="user_firstname"
+                  value={editedProfile.user_firstname}
+                  onChange={handleChange}
+                  placeholder="Digite seu primeiro nome..."
+                  className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="user_lastname" className="text-slate-700">
+                  Sobrenome
+                </Label>
+                <Input
+                  id="user_lastname"
+                  type="text"
+                  name="user_lastname"
+                  value={editedProfile.user_lastname}
+                  onChange={handleChange}
+                  placeholder="Digite seu sobrenome..."
+                  className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="user_age" className="text-slate-700">
+                  Idade
+                </Label>
+                <Input
+                  id="user_age"
+                  type="number"
+                  name="user_age"
+                  value={editedProfile.user_age}
+                  onChange={handleChange}
+                  placeholder="Digite sua idade..."
+                  className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                onClick={handleCloseModal}
+                className="px-4 py-2 cursor-pointer hover:bg-slate-100"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  !editedProfile.user_name ||
+                  !editedProfile.user_firstname ||
+                  !editedProfile.user_lastname ||
+                  !editedProfile.user_age
+                }
+                className="bg-linear-to-r cursor-pointer px-4 py-2 from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md disabled:opacity-50"
+              >
+                Salvar Alterações
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
