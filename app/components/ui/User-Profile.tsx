@@ -53,11 +53,12 @@ export default function UserProfile() {
     const handleLogout = async () => {
         await logoutUser();
         
-       setTimeout(() => {
-          alert('Logout realizado! Redirecionando...');  // Ou use uma biblioteca de toast
-          router.replace('/');
-        }, 2000);
-    
+      //  setTimeout(() => {
+      //     alert('Logout realizado! Redirecionando...');  // Ou use uma biblioteca de toast
+      //     router.replace('/');
+      //   }, 2000);
+
+        window.location.reload()
         setDropdownOpen(false)
   };
 
