@@ -5,7 +5,7 @@ import Image from "next/image";
 import logo from "../assets/logo_white.png";
 import { useAuth } from "../lib/useAuth"; 
 
-import UserProfile from "./ui/User-Profile";
+import UserProfile from "./ui/Profile_navBar";
 import { FaBookOpen, FaUsers } from "react-icons/fa";
 
 export function NavBar() {

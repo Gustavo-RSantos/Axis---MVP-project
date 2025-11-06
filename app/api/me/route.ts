@@ -5,19 +5,20 @@ import { getUserFromCookie } from "../../lib/auth";
 export async function GET() {
   try {
     const payload = await getUserFromCookie();
-    console.log("Dados do payload no /api/me:", payload);  // Já existe, mas confirme se aparece
+    //console.log("Dados do payload no /api/me:", payload); 
     
     if (!payload) {
       console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
     
-    // Validação do user_id (já existe)
+    // Validação do user_id se ele existe ou não.
     if (typeof payload.user_id !== "number" || payload.user_id <= 0) {
       console.log("User ID inválido:", payload.user_id);
       return NextResponse.json({ success: false, message: "Token inválido" }, { status: 400 });
     }
     
+    // querry puxando o user_id 
     const user = await prisma.cadastros.findUnique({
       where: { user_id: payload.user_id },
     });

@@ -2,14 +2,20 @@
 
 import bcrypt from "bcrypt";
 import prisma from "../../lib/prisma";
-import { dataProps, dataUpdateProps } from "../../interface/user.interface";
+import { dataProps } from "../../interface/user.interface";
 import { getUserFromCookie } from "@/app/lib/auth";
 import { NextResponse } from "next/server";
 
+import path from "path";
+import fs from 'fs';
+
 export async function createCadastro(data : dataProps) {
+
+  
   
   try {
-        const userMailAlreadyExists = await prisma.cadastros.findFirst({
+      // puxa o email do usuario usando como parametro o email do formulario.
+      const userMailAlreadyExists = await prisma.cadastros.findFirst({
       where: {
         user_mail: data.email
       }
@@ -20,8 +26,8 @@ export async function createCadastro(data : dataProps) {
     }
 
     const hash = await bcrypt.hash(data.password, 10);
-
-    await prisma.cadastros.create({
+    //create = insert / envia os seguintes dados para o banco: user_firsname, user_secondname , user_mail , user_phone , user_age , user_password_hash.
+    const novoCadastro = await prisma.cadastros.create({
       data: {
         user_firstname: data.firstName,
         user_secondname: data.lastName,
@@ -32,6 +38,21 @@ export async function createCadastro(data : dataProps) {
       },
     });
 
+    const imagemPadraoPath = path.join(process.cwd(), "public", "iconePerfil.png");
+    console.log("Caminho da imagem:", imagemPadraoPath);
+    console.log("Arquivo existe?", fs.existsSync(imagemPadraoPath));
+
+    const imagemBytes = fs.readFileSync(imagemPadraoPath);  // Buffer de bytes
+    
+    await prisma.perfis.create ({
+      data: {
+        user_id: novoCadastro.user_id,
+        user_name: `Axis #${novoCadastro.user_id}`,
+        user_image: imagemBytes,
+      }
+    });
+    
+
     return { success: true };
   } catch (error) {
     console.error("Erro ao criar cadastro:", error);
@@ -40,16 +61,17 @@ export async function createCadastro(data : dataProps) {
 }
 
 
+// Puxando dados do banco para manipulação na pagina PERFIL
 export async function GET() {
   
   try {
     const payload = await getUserFromCookie();
 
     if (!payload) {
-          console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
+          // console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-
+    // Querry para puxar os seguintes dads: user_name , user_secondname ,user_mail , user_age , perfis: user_name , user_image.
     const userData = await prisma.cadastros.findUnique({
       select: {
         user_firstname: true,
@@ -58,6 +80,7 @@ export async function GET() {
         user_age: true,
         perfis: {
           select: {
+            user_name: true,
             user_image: true
           }
         }
@@ -67,7 +90,7 @@ export async function GET() {
       }
     })
 
-    console.log("dadosDoUsuario" + userData)
+    // console.log("dadosDoUsuario" + userData)
 
     // const userExamData = await prisma.calendarios.findMany({
     //   select: {
@@ -79,7 +102,14 @@ export async function GET() {
       return NextResponse.json({ success: false, message: "Usuário não encontrado" }, { status: 404 });
     }
 
-    console.log("Usuário encontrado e retornado com sucesso.");
+    const userImageArray = userData?.perfis?.user_image
+      ? Array.from(userData.perfis.user_image)  // Garante que seja [number, ...]
+      : null;
+    // console.log("userImageArray para retorno:", userImageArray);
+
+    // console.log("Usuário encontrado e retornado com sucesso.");
+
+    // console.log("Usuário encontrado e retornado com sucesso.");
     
     return new Response(JSON.stringify({
          success: true,
@@ -87,7 +117,8 @@ export async function GET() {
          user_secondName: userData.user_secondname,
          user_mail: userData.user_mail,
          user_age: userData.user_age,
-         user_image: userData.perfis?.user_image, 
+         user_name: userData.perfis?.user_name,
+         user_image: userImageArray, 
        }), {
          headers: { 'Content-Type': 'application/json' },
        });
@@ -100,6 +131,41 @@ export async function GET() {
   }
 }
 
-export async function UPDATE(data : dataUpdateProps) {
-  
-}
+// export async function updateUserData(data: dataUpdateProps) {
+//   try {
+//     const payload = await getUserFromCookie();
+
+//     if (!payload) {
+//           console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
+//           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
+//     }
+    
+//     // Querry para enviar os seguintes dados: user_firstname , user_secondname , email , User_name. (pegar a querry com matheus)
+//     const userData = await prisma.cadastros.update({
+//       where: {
+//         user_id: payload.user_id
+//       },
+//       data: {
+//         user_firstname: data.firstName,
+//         user_secondname: data.lastName,
+//         user_age: Number(data.idade), 
+//         perfis: {
+//           update: {
+//             user_name: data.userName,
+//           }
+//         }
+//       },
+//     })
+
+//     return NextResponse.json({
+//       success: true,
+//       user: userData
+//     })
+
+//   } catch {
+//     return NextResponse.json(
+//       { success: false, message: "Erro interno no servidor" },
+//       { status: 500 }
+//     )
+//   }
+// }

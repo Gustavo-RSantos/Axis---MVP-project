@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const { email, password } = await req.json();
 
     // Busca o usuário pelo email
+    // puxa o user_id , user_mail , user_password_hash com parametro de user_mail
     const user = await prisma.cadastros.findFirst({
       select: {
         user_id: true,
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     console.log("Passou o Email")
-    console.log(password)
+    // console.log(password)
     
     // Comparando a senha enviada com o hash do banco
     const isValid = await bcrypt.compare(password, user.user_password_hash); 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
 
     // Gerando token
     const token = await generateToken(user.user_id);
-    console.log("Token gerado: " + token)
+    //console.log("Token gerado: " + token)
 
     // Criando resposta
     const response = NextResponse.json({ success: true, message: "Login bem-sucedido" });

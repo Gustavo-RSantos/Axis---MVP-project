@@ -12,7 +12,7 @@ export default function UserProfile() {
   const [userProfile, setUserProfile] = useState({
       user_id: 0,
       user_name: '',
-      user_image: null as Blob | null
+      user_image: null as string | null
   });
   
   useEffect(() => {
@@ -23,23 +23,28 @@ export default function UserProfile() {
               credentials: "include",
             });
   
-            const userProfile = await response.json();
+            const data = await response.json();
   
-            if (userProfile.success) {
-  
-              let imageBlob: Blob | null = null;
-              if (userProfile.user_image && Array.isArray(userProfile.user_image)) {
-                const byteArray = new Uint8Array(userProfile.user_image);  // Converte array de bytes para Uint8Array
-                imageBlob = new Blob([byteArray], { type: 'image/jpeg' });  // Ajuste mimeType
+            if (data.success) {
+
+              let imageUrl: string | null = null;
+
+              // Verifica se user_image é um Uint8Array (ou array-like) com dados
+              if (data.user_image && Array.isArray(data.user_image) && data.user_image.length > 0) {
+                  const byteArray = new Uint8Array(data.user_image);  // Converte o array JS em Uint8Array
+                  const imageBlob = new Blob([byteArray], { type: "image/png" });
+                  imageUrl = URL.createObjectURL(imageBlob);
               }
+
+              console.log("URL da IMAGEM : ", imageUrl)
   
                setUserProfile({
-                user_id: userProfile.user_id,
-                user_name: userProfile.user_name,
-                user_image: imageBlob
+                user_id: data.user_id,
+                user_name: data.user_name,
+                user_image: imageUrl || null,
              });
             } else {
-              console.error("Erro ao carregar dados:", userProfile.message);
+              console.error("Erro ao carregar dados:", data.message);
             }
           } catch (error) {
             console.error("Erro na requisição:", error);
@@ -47,6 +52,15 @@ export default function UserProfile() {
         };
         fetchUserData();
       }, []);
+
+  useEffect(() => {
+    return () => {
+      if (userProfile.user_image) {
+        URL.revokeObjectURL(userProfile.user_image);
+      }
+    };
+  }, [userProfile.user_image]);
+
 
   const router = useRouter();
 
@@ -71,7 +85,7 @@ export default function UserProfile() {
         className="flex items-center space-x-2 cursor-pointer focus:outline-none"
       >
         <Image
-          src={userProfile.user_image || iconTeste} 
+          src={userProfile.user_image || iconTeste}
           alt="Icone de perfil"
           width={100}
           height={100}

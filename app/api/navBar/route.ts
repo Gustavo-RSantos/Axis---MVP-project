@@ -10,7 +10,7 @@ export async function GET() {
           console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-
+    // puxa os seguintes dados : user_id , Perfis: user_name , user_image.
     const userProfile = await prisma.cadastros.findUnique({
       select:{
         user_id: true,
@@ -26,19 +26,24 @@ export async function GET() {
       }
     })
 
-    console.log(userProfile)
+    // console.log(userProfile)
 
     if (!userProfile) {
       return NextResponse.json({ success: false, message: "Usuário não encontrado" }, { status: 404 });
     }
 
-    console.log("Usuário encontrado e retornado com sucesso.");
+    const userImageArray = userProfile?.perfis?.user_image
+      ? Array.from(userProfile.perfis.user_image)  // Garante que seja [number, ...]
+      : null;
+    // console.log("userImageArray para retorno:", userImageArray);
+
+    // console.log("Usuário encontrado e retornado com sucesso.");
     
     return new Response(JSON.stringify({
             success: true,
             user_id: userProfile.user_id,
             user_name: userProfile.perfis?.user_name,
-            user_image: userProfile.perfis?.user_image
+            user_image: userImageArray,
        }), {
          headers: { 'Content-Type': 'application/json' },
        });

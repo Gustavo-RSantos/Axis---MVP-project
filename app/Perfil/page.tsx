@@ -17,7 +17,8 @@ export default function Perfil(){
     user_secondName: '',
     user_mail: '',
     user_age: 0,
-    user_image: null as Blob | null
+    user_image: null as string | null,
+    user_name: '',
   })
 
   useEffect(() => {
@@ -33,18 +34,24 @@ export default function Perfil(){
 
           if (userData.success) {
 
-            let imageBlob: Blob | null = null;
-            if (userData.user_image && Array.isArray(userData.user_image)) {
-              const byteArray = new Uint8Array(userData.user_image);  // Converte array de bytes para Uint8Array
-              imageBlob = new Blob([byteArray], { type: 'image/jpeg' });  // Ajuste mimeType
-            }
+            let imageUrl: string | null = null;
+
+              // Verifica se user_image é um Uint8Array (ou array-like) com dados
+              if (userData.user_image && Array.isArray(userData.user_image) && userData.user_image.length > 0) {
+                  const byteArray = new Uint8Array(userData.user_image);  // Converte o array JS em Uint8Array
+                  const imageBlob = new Blob([byteArray], { type: "image/png" });
+                  imageUrl = URL.createObjectURL(imageBlob);
+              }
+
+              console.log("URL da IMAGEM : ", imageUrl)
 
              setUserData({
               user_firstName: userData.user_firstName || '',
               user_secondName: userData.user_secondName || '',
               user_mail: userData.user_mail || '',
               user_age: userData.user_age || 0,
-              user_image: imageBlob
+              user_name: userData.user_name,
+              user_image: imageUrl,
            });
           } else {
             console.error("Erro ao carregar dados:", userData.message);
@@ -115,9 +122,10 @@ export default function Perfil(){
         <div className="mb-8">
           <ProfileCard 
             firstName = {userData.user_firstName}
-            lastName = {userData.user_secondName}
+            secondName = {userData.user_secondName}
             email = {userData.user_mail}
             age = {userData.user_age}
+            name = {userData.user_name}
             imageUrl = {userData.user_image}
           />
         </div>

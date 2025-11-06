@@ -25,9 +25,9 @@ export async function setAuthCookie(token: string , response: NextResponse) {
 
 export async function getUserFromCookie() {
   const cookieStore = await cookies();
-  console.log("CookieStore completo:", cookieStore);  // Log todos os cookies
+  // console.log("CookieStore completo:", cookieStore);  // Log todos os cookies
   const token = cookieStore.get("auth_token")?.value;
-  console.log("Token extraído do cookie 'auth_token':", token ? "Presente (não logado por segurança)" : "Ausente");
+  // console.log("Token extraído do cookie 'auth_token':", token ? "Presente (não logado por segurança)" : "Ausente");
   
   if (!token) {
     console.log("Nenhum token encontrado. Cookie não enviado na requisição?");
@@ -36,7 +36,7 @@ export async function getUserFromCookie() {
   
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as unknown as { user_id: number };
-    console.log("Token decodificado com sucesso. User ID:", decoded.user_id);
+  // console.log("Token decodificado com sucesso. User ID:", decoded.user_id);
     return decoded;
   } catch (error) {
     console.error("Erro na verificação do JWT:", error);

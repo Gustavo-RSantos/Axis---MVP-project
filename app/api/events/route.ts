@@ -22,6 +22,7 @@ export async function GET() {
     }
 
     // 2. Buscar eventos do usuário no banco
+    // puxa os seguintes dados: calendar_id , calendar_consulta, calendar_data usando como parametro o user_id
     const events = await prisma.calendarios.findMany({
       select: {
         calendar_id: true,
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
+    // create = insert  / inserindo os seguintes dados : calendar_consulta , calendar_data , user_id.
     const newEvent = await prisma.calendarios.create({
       data: {
         calendar_consulta,

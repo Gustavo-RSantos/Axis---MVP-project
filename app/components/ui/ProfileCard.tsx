@@ -10,30 +10,32 @@ import { useState } from 'react';
 
 interface ProfileCardProps {
   firstName: string;
-  lastName: string;
+  secondName: string;
   email: string;
   age: number;
-  imageUrl: Blob | null;
+  name: string | null;
+  imageUrl: string | null;
 }
 
 interface UserProfile {
-  user_name: string;
+  user_name: string | null;
   user_firstname: string;
-  user_lastname: string;
+  user_secondname: string;
   user_age: number;
 }
 
-export function ProfileCard({ firstName, lastName, email, age, imageUrl }: ProfileCardProps) {
+export function ProfileCard({ firstName, secondName, email, age, name, imageUrl }: ProfileCardProps) {
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    user_name: "joao_silva",
+    user_name: name,
     user_firstname: firstName,
-    user_lastname: lastName,
+    user_secondname: secondName,
     user_age: age,
   });
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
+  const [message, setMessage] = useState("");
 
   const handleOpenModal = () => {
     setEditedProfile(userProfile);
@@ -43,20 +45,49 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
   const handleCloseModal = () => {
     setShowProfileModal(false);
     setEditedProfile(userProfile);
+    setMessage("");
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditedProfile((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'user_age' ? Number(value) : value, 
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setUserProfile(editedProfile);
-    setShowProfileModal(false);
+ async function handleSubmit(event: React.FormEvent<HTMLFormElement>){
+    event.preventDefault();
+      try {
+        const response = await fetch('/api/update', {  
+          method: 'POST',  
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', 
+          body: JSON.stringify(editedProfile),  
+        });
+
+        const res = await response.json();
+        console.log('Resposta da API:', res); // Log para depuração
+
+        if (response.ok && res?.success) {
+          setMessage("Perfil atualizado com sucesso!");
+          setUserProfile({
+            user_name: res.user.perfis?.user_name || editedProfile.user_name,
+            user_firstname: res.user.user_firstname,
+            user_secondname: res.user.user_secondname,
+            user_age: res.user.user_age,
+          });
+          window.location.reload()
+          setShowProfileModal(false);
+        } else {
+          setMessage(res.message || "Erro ao atualizar perfil.");
+        }
+      } catch (error) {
+        console.error("Erro no envio do formulário:", error);
+        setMessage("Erro no envio do formulário.");
+      }
   };
 
   return (
@@ -75,7 +106,7 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
 
         {/* Profile Info */}
         <div className="p-6 md:p-8 flex-1">
-          <h2 className="text-gray-900 mb-2">{firstName} {lastName}</h2>
+          <h2 className="text-gray-900 mb-2">{firstName} {secondName}</h2>
           
           <div className="flex flex-wrap items-center gap-4 mb-4 text-gray-600">
             <div className="flex items-center gap-2">
@@ -134,7 +165,7 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
                   id="user_name"
                   type="text"
                   name="user_name"
-                  value={editedProfile.user_name}
+                  value={editedProfile.user_name || ""} 
                   onChange={handleChange}
                   placeholder="Digite seu nome de usuário..."
                   className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
@@ -157,14 +188,14 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="user_lastname" className="text-slate-700">
+                <Label htmlFor="user_secondname" className="text-slate-700">
                   Sobrenome
                 </Label>
                 <Input
-                  id="user_lastname"
+                  id="user_secondname"
                   type="text"
-                  name="user_lastname"
-                  value={editedProfile.user_lastname}
+                  name="user_secondname"
+                  value={editedProfile.user_secondname}
                   onChange={handleChange}
                   placeholder="Digite seu sobrenome..."
                   className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
@@ -186,6 +217,11 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
                 />
               </div>
             </div>
+             {message && (
+              <div className={`p-2 rounded ${message.includes('sucesso') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {message}
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -199,7 +235,7 @@ export function ProfileCard({ firstName, lastName, email, age, imageUrl }: Profi
                 disabled={
                   !editedProfile.user_name ||
                   !editedProfile.user_firstname ||
-                  !editedProfile.user_lastname ||
+                  !editedProfile.user_secondname ||
                   !editedProfile.user_age
                 }
                 className="bg-linear-to-r cursor-pointer px-4 py-2 from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md disabled:opacity-50"
