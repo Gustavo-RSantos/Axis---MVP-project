@@ -1,4 +1,4 @@
-import { Mail, Settings, Key, User } from 'lucide-react';
+import { Mail, Settings, Key, User, Trash2 } from 'lucide-react';
 import imageBase from "../../assets/iconePadrao.webp"
 import Image from 'next/image';
 
@@ -37,24 +37,38 @@ export function ProfileCard({ firstName, secondName, email, age, name, imageUrl 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
   const [message, setMessage] = useState("");
 
-  const handleOpenModal = () => {
+  function handleOpenModal(){
     setEditedProfile(userProfile);
     setShowProfileModal(true);
   };
 
-  const handleCloseModal = () => {
+  function handleCloseModal() {
     setShowProfileModal(false);
     setEditedProfile(userProfile);
     setMessage("");
   };
 
- const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ function handleChange(e: React.ChangeEvent<HTMLInputElement>){
     const { name, value } = e.target;
     setEditedProfile((prev) => ({
       ...prev,
       [name]: name === 'user_age' ? Number(value) : value, 
     }));
   };
+
+  async function handleDeleteUser(){
+
+    try {
+      await fetch('/api/userDelete', {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+    } catch(error){
+       console.error("Erro em deletar usuário", error);
+        setMessage("Erro ao deletar usuário.");
+    }
+  }
 
  async function handleSubmit(event: React.FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -135,6 +149,13 @@ export function ProfileCard({ firstName, secondName, email, age, name, imageUrl 
               >
                 <Key className="w-4 h-4" />
                 Alterar senha
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="cursor-pointer inline-flex items-center justify-center gap-2 text-red-600 hover:text-red-700 transition-colors px-4 py-2 rounded-lg hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                Deletar Usuário
               </button>
             </div>
           </div>
