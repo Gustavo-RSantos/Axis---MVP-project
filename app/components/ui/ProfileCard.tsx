@@ -634,6 +634,13 @@ export function ProfileCard({
             <DialogDescription className="flex justify-center">
               Mude sua imagem de perfil. Clique em salvar quando terminar.
             </DialogDescription>
+
+            <DialogDescription className="flex justify-center">
+               <strong>Recomendamos <span className="text-red-500">NÃO</span> utilizar imagem propria</strong>
+            </DialogDescription>
+            <DialogDescription className="flex justify-center">
+               <strong>para se manter anônimo</strong>
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleChangeImage}>
             <div className="space-y-4 py-4">
