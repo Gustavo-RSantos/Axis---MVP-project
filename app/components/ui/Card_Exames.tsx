@@ -43,11 +43,11 @@ export default function Card_Exames({ title, date, time, status }: CardExamesPro
           </div>
         </div>
 
-        <Button 
+        {/* <Button 
           className="cursor-pointer h-9 px-4 py-2 border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 w-full sm:w-auto whitespace-nowrap"
         >
           Editar
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

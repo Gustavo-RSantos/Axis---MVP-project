@@ -34,6 +34,7 @@ import { ContentCalendar } from "../components/ui/Card_Calendar";
 interface Event {
   calendar_id: number;
   calendar_consulta: string;
+  calendar_hour: string;
   calendar_date: Date | string;
 }
 
@@ -49,29 +50,38 @@ export default function App() {
   const [newEvent, setNewEvent] = useState<Event>({
     calendar_id: 0,
     calendar_consulta: "",
+    calendar_hour: "",
     calendar_date: "",
   });
 
   function handleDeleteModal(data: { event: { id: string } }) {
     setShowDeleteModal(true);
-    setIdToDelete(Number(data.event.id)); // Converte id para number (compatível com calendar_id)
+    setIdToDelete(Number(data.event.id));
   }
   // Função para fechar os modais
   function handleCloseModal() {
     setShowModal(false);
     setNewEvent({
       calendar_consulta: "",
+      calendar_hour: "", 
       calendar_date: "",
       calendar_id: 0,
     });
     setShowDeleteModal(false);
     setIdToDelete(null);
   }
-  // Função para atualizar o input
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setNewEvent({
       ...newEvent,
-      calendar_consulta: e.target.value, // Atualiza apenas o campo calendar_consulta
+      calendar_consulta: event.target.value,
+    });
+  };
+
+  function handleChangeHour(event: React.ChangeEvent<HTMLInputElement>):void{
+    setNewEvent({
+      ...newEvent,
+      calendar_hour: event.target.value,
     });
   };
 
@@ -86,7 +96,9 @@ export default function App() {
         if (data.success) {
           const formattedEvents = data.events.map((event: Event) => ({
             ...event,
-            calendar_date: event.calendar_date ? new Date(event.calendar_date) : new Date(), 
+            calendar_date: event.calendar_date
+              ? new Date(event.calendar_date)
+              : new Date(),
           }));
           setAllEvents(formattedEvents);
         } else {
@@ -111,7 +123,6 @@ export default function App() {
   async function handleDelete() {
     if (!idToDelete) return;
     try {
-
       const response = await fetch("/api/events", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +130,7 @@ export default function App() {
       });
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       if (data.success) {
         setAllEvents(
           allEvents.filter((event) => event.calendar_id !== idToDelete)
@@ -137,14 +148,25 @@ export default function App() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      // Converta calendar_date para ISO string antes de enviar
+
+      // Combina data e hora em uma única Date
+      let combinedDate: Date;
+      if (newEvent.calendar_date instanceof Date) {
+        combinedDate = new Date(newEvent.calendar_date);
+      } else {
+        combinedDate = new Date(newEvent.calendar_date);
+      }
+      if (newEvent.calendar_hour) {
+        const [hours, minutes] = newEvent.calendar_hour.split(':').map(Number);
+        combinedDate.setHours(hours, minutes, 0, 0);  // Define horas, minutos, segundos e milissegundos
+      }
+
+      // Converta para ISO string
       const eventToSend = {
         calendar_consulta: newEvent.calendar_consulta,
-        calendar_date:
-          newEvent.calendar_date instanceof Date
-            ? newEvent.calendar_date.toISOString() // Padrão ISO
-            : new Date(newEvent.calendar_date).toISOString(), // Fallback se for string
+        calendar_date: combinedDate.toISOString(),
       };
+
       const response = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -156,6 +178,7 @@ export default function App() {
         setShowModal(false);
         setNewEvent({
           calendar_id: 0,
+          calendar_hour: "",
           calendar_consulta: "",
           calendar_date: "",
         });
@@ -251,7 +274,7 @@ export default function App() {
         </Card>
       </main>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Tela de confirmação de exclusão de consulta */}
       <AlertDialogs open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <AlertDialogContent className="bg-white/95 backdrop-blur-sm">
           <AlertDialogHeader>
@@ -283,7 +306,7 @@ export default function App() {
         </AlertDialogContent>
       </AlertDialogs>
 
-      {/* Add Event Dialog */}
+      {/* Tela de adicionar novo evento */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="bg-white/95 backdrop-blur-sm">
           <DialogHeader>
@@ -300,19 +323,35 @@ export default function App() {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-700">
-                  Título do Evento
-                </Label>
-                <Input
-                  id="title"
-                  type="text"
-                  name="title"
-                  value={newEvent.calendar_consulta}
-                  onChange={handleChange}
-                  placeholder="Digite o título do evento..."
-                  className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500"
-                />
+              <div className="space-y-2 flex gap-6">
+                <div>
+                  <Label htmlFor="title" className="text-slate-700 mb-1">
+                    Nome da Consulta
+                  </Label>
+                  <Input
+                    id="title"
+                    type="text"
+                    name="title"
+                    value={newEvent.calendar_consulta}
+                    onChange={handleChange}
+                    placeholder="Digite nome da consulta..."
+                    className="w-60 border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="title" className="text-slate-700 mb-1">
+                    Horario da Consulta
+                  </Label>
+                  <Input
+                    id="title"
+                    type="time"
+                    name="title"
+                    value={newEvent.calendar_hour}
+                    onChange={handleChangeHour}
+                    placeholder="Digite o título do evento..."
+                    className="w-40 border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter>

@@ -10,9 +10,6 @@ import path from "path";
 import fs from 'fs';
 
 export async function createCadastro(data : dataProps) {
-
-  
-  
   try {
       // puxa o email do usuario usando como parametro o email do formulario.
       const userMailAlreadyExists = await prisma.cadastros.findFirst({
@@ -83,20 +80,19 @@ export async function GET() {
             user_name: true,
             user_image: true
           }
+        },
+        calendarios: {
+          select:{
+            calendar_id: true,
+            calendar_consulta: true,
+            calendar_data: true,
+          }
         }
       },
       where: {
         user_id: payload.user_id
       }
     })
-
-    // console.log("dadosDoUsuario" + userData)
-
-    // const userExamData = await prisma.calendarios.findMany({
-    //   select: {
-        
-    //   }
-    // })
 
     if (!userData) {
       return NextResponse.json({ success: false, message: "Usuário não encontrado" }, { status: 404 });
@@ -110,6 +106,10 @@ export async function GET() {
     // console.log("Usuário encontrado e retornado com sucesso.");
 
     // console.log("Usuário encontrado e retornado com sucesso.");
+
+    //  console.log("User ID do payload:", payload.user_id);
+    //  console.log("Dados do usuário encontrados:", userData);
+    //  console.log("Calendarios retornados:", userData?.calendarios);
     
     return new Response(JSON.stringify({
          success: true,
@@ -119,6 +119,7 @@ export async function GET() {
          user_age: userData.user_age,
          user_name: userData.perfis?.user_name,
          user_image: userImageArray, 
+         calendarios: userData.calendarios,
        }), {
          headers: { 'Content-Type': 'application/json' },
        });
@@ -130,42 +131,3 @@ export async function GET() {
     )
   }
 }
-
-// export async function updateUserData(data: dataUpdateProps) {
-//   try {
-//     const payload = await getUserFromCookie();
-
-//     if (!payload) {
-//           console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
-//           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
-//     }
-    
-//     // Querry para enviar os seguintes dados: user_firstname , user_secondname , email , User_name. (pegar a querry com matheus)
-//     const userData = await prisma.cadastros.update({
-//       where: {
-//         user_id: payload.user_id
-//       },
-//       data: {
-//         user_firstname: data.firstName,
-//         user_secondname: data.lastName,
-//         user_age: Number(data.idade), 
-//         perfis: {
-//           update: {
-//             user_name: data.userName,
-//           }
-//         }
-//       },
-//     })
-
-//     return NextResponse.json({
-//       success: true,
-//       user: userData
-//     })
-
-//   } catch {
-//     return NextResponse.json(
-//       { success: false, message: "Erro interno no servidor" },
-//       { status: 500 }
-//     )
-//   }
-// }

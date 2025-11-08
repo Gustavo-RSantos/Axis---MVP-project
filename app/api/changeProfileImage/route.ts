@@ -1,31 +1,3 @@
-// import { getUserFromCookie } from "@/app/lib/auth";
-// import prisma from "@/app/lib/prisma";
-// import { NextResponse } from "next/server";
-
-// export async function POST(req: Request) { 
-//   try {
-//     const payload = await getUserFromCookie();
-
-//     if (!payload) {
-//       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
-//     }
-
-//     const newProfileImage = await req.json();
-    
-//     // Validações básicas
-//     const userPassword = await prisma.perfis.update({
-//       where: { user_id: payload.user_id },
-//         data: { user_image: newProfileImage.user_image }
-//     });
-
-//     console.log("Dados atualizados:", userPassword); // Log para confirmar atualização
-//     return NextResponse.json({ success: true, user: userPassword });
-//   } catch (error) {
-//     console.error("Erro ao atualizar:", error);
-//     return NextResponse.json({ success: false, message: "Erro interno no servidor" }, { status: 500 });
-//   }
-// }
-
 import { getUserFromCookie } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
 import { NextResponse } from "next/server";

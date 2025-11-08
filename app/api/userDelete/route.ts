@@ -9,12 +9,6 @@ export async function DELETE() {  // Ou PUT
     if (!payload) {
       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-
-    // deleteUserPostComentarios (pode depender de postagens).
-    // deleteUserPostLikes (pode depender de postagens).
-    // deleteUserPostagens (depende de cadastros).
-    // deleteUserPerfil (depende de cadastros).
-    // deleteUserCadastro (tabela pai, deletar por último).
         
     const deleteUserPostComentarios =  prisma.postagem_comentarios.deleteMany({
         where: {
@@ -36,9 +30,9 @@ export async function DELETE() {  // Ou PUT
             user_id : payload.user_id
         }
     })
-    // COLOCAR A PORRA DA CONST DENTRO DO $transaction CARALHO
+    // lembrar de adicionar deleteUserFavArtigos na const deleteUserCadastro PORRA
     // const deleteUserFavArtigos = await prisma.favorito_artigos.delete({
-        //     where: {
+    //         where: {
     //         user_id : payload.user_id
     //     }
     // })
