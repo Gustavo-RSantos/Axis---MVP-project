@@ -1,14 +1,15 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 import {
   Heart,
   MessageCircle,
   Share2,
   Plus,
-  TrendingUp,
   CalendarCheck,
   Users,
   Flame,
@@ -21,164 +22,136 @@ import Input from "../components/ui/Input";
 import Textarea from "../components/ui/TextArea";
 import Card from "../components/ui/Post_Card";
 import Image from "next/image";
+import InputRef from "../components/ui/InputRef";
 
 interface Comentario {
   id: number;
-  autor: string;
-  avatar: string;
-  conteudo: string;
-  tempo: string;
+  user_name: string;
+  user_image: string;
+  comentario_text: string;
+  comentario_data: string;
 }
 
 interface Post {
   id: number;
-  autor: string;
-  avatar: string;
-  tempo: string;
-  conteudo: string;
-  imagem?: string;
-  categoria: string;
-  curtidas: number;
+  user_name: string;
+  user_image: string;
+  data: string;
+  name: string;
+  text: string;
+  image?: string;
+  gender: string;
+  likes: number;
   comentarios: Comentario[];
   curtido: boolean;
 }
 
 export default function App() {
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: 1,
-      autor: "Carlos Silva",
-      avatar: "CS",
-      tempo: "há 2 horas",
-      conteudo:
-        "Comecei minha jornada de exercícios há 3 meses e os resultados têm sido incríveis! Perdi 8kg e me sinto muito mais disposto. A dica que dou é: consistência é tudo. Comece devagar e vá aumentando gradualmente.",
-      imagem:
-        "https://images.unsplash.com/photo-1756115484694-009466dbaa67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwd29ya291dCUyMGd5bXxlbnwxfHx8fDE3NjIxMDU1MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      categoria: "Fitness",
-      curtidas: 124,
-      curtido: false,
-      comentarios: [
-        {
-          id: 1,
-          autor: "Maria Santos",
-          avatar: "MS",
-          conteudo: "Parabéns pela conquista! Que inspiração! 💪",
-          tempo: "há 1 hora",
-        },
-        {
-          id: 2,
-          autor: "João Pedro",
-          avatar: "JP",
-          conteudo: "Muito bom! Qual rotina você seguiu?",
-          tempo: "há 45 min",
-        },
-      ],
-    },
-    {
-      id: 2,
-      autor: "Ana Paula",
-      avatar: "AP",
-      tempo: "há 4 horas",
-      conteudo:
-        "Descobri que a meditação matinal mudou completamente minha vida. Comecei com apenas 5 minutos por dia e agora consigo meditar por 30 minutos. Minha ansiedade diminuiu muito e durmo muito melhor.",
-      imagem:
-        "https://images.unsplash.com/photo-1635545999375-057ee4013deb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpdGF0aW9uJTIwd2VsbG5lc3MlMjByZWxheGF0aW9ufGVufDF8fHx8MTc2MjIwMjMxN3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      categoria: "Bem-estar",
-      curtidas: 89,
-      curtido: true,
-      comentarios: [
-        {
-          id: 1,
-          autor: "Ricardo Lima",
-          avatar: "RL",
-          conteudo: "Você usa algum app específico?",
-          tempo: "há 2 horas",
-        },
-      ],
-    },
-    {
-      id: 3,
-      autor: "Fernando Costa",
-      avatar: "FC",
-      tempo: "há 6 horas",
-      conteudo:
-        "Alguém tem dicas de alimentação saudável para quem trabalha o dia todo? Estou tentando melhorar minha dieta mas sempre acabo comendo besteira por falta de tempo para preparar refeições.",
-      imagem:
-        "https://images.unsplash.com/photo-1606858274001-dd10efc5ce7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwZm9vZCUyMG1lYWwlMjBwcmVwfGVufDF8fHx8MTc2MjExNzEwN3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      categoria: "Nutrição",
-      curtidas: 56,
-      curtido: false,
-      comentarios: [
-        {
-          id: 1,
-          autor: "Juliana Oliveira",
-          avatar: "JO",
-          conteudo:
-            "Meal prep aos domingos mudou minha vida! Deixo tudo pronto para a semana.",
-          tempo: "há 3 horas",
-        },
-        {
-          id: 2,
-          autor: "Pedro Henrique",
-          avatar: "PH",
-          conteudo:
-            "Tenho várias receitas rápidas e saudáveis. Te mando no privado!",
-          tempo: "há 2 horas",
-        },
-      ],
-    },
-  ]);
-
+  const [posts, setPosts] = useState<Post[]>([]);
   const [novoPost, setNovoPost] = useState("");
-  const [novoComentario, setNovoComentario] = useState<{
-    [key: number]: string;
-  }>({});
+  const [postName, setPostName] = useState(""); // Novo estado para título
+  const [postGender, setPostGender] = useState("Geral"); // Categoria
+  const [postImage, setPostImage] = useState<File | null>(null);
   const [mostrarComentarios, setMostrarComentarios] = useState<{
     [key: number]: boolean;
   }>({});
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref para o input de arquivo
+  const comentarioRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
-  const handleCurtir = (postId: number) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            curtido: !post.curtido,
-            curtidas: post.curtido ? post.curtidas - 1 : post.curtidas + 1,
-          };
+  useEffect(() => { 
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch("/api/communityPosts");
+        const data = await response.json();
+        console.log(data)
+        if (data.success) {
+          setPosts(data.posts);
+          console.log(data.posts);
         }
-        return post;
-      })
-    );
-  };
+      } catch (error) {
+        console.error("Erro ao buscar posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
 
-  const handleAdicionarComentario = (postId: number) => {
-    const comentarioTexto = novoComentario[postId]?.trim();
-    if (!comentarioTexto) return;
+  async function handleCurtir(postId: number) {
+    try {
+      const response = await fetch(`/api/communityPosts/${postId}/like`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPosts(
+          posts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  curtido: data.liked,
+                  likes: data.liked ? post.likes + 1 : post.likes - 1,
+                }
+              : post
+          )
+        );
+      } else {
+        alert("Erro ao dar like: " + data.message);
+      }
+    } catch (error) {
+      console.error("Erro ao dar like:", error);
+      alert("Erro ao dar like");
+    }
+  }
 
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            comentarios: [
-              ...post.comentarios,
-              {
-                id: post.comentarios.length + 1,
-                autor: "Você",
-                avatar: "VC",
-                conteudo: comentarioTexto,
-                tempo: "agora",
-              },
-            ],
-          };
-        }
-        return post;
-      })
-    );
+  async function handleAdicionarComentario(postId: number) {
 
-    setNovoComentario({ ...novoComentario, [postId]: "" });
-  };
+  const inputElement = comentarioRefs.current[postId];
+  const comentarioTexto = inputElement?.value.trim() || "";
+
+  if (!comentarioTexto) return;
+
+  try {
+    const response = await fetch(`/api/communityPosts/${postId}/comment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: comentarioTexto }),
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.comment) {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comentarios: [
+                  ...post.comentarios,
+                  {
+                    id: data.comment.comentario_id,
+                    user_name: data.comment.user_name,
+                    user_image: data.comment.user_image,
+                    comentario_text: comentarioTexto,
+                    comentario_data: new Date().toISOString(),
+                  },
+                ],
+              }
+            : post
+        )
+      );
+      // Limpar o campo após enviar
+      if (inputElement) inputElement.value = "";
+    } else {
+      alert("Erro ao adicionar comentário: " + (data.message || "Resposta inválida"));
+    }
+  } catch (error) {
+    console.error("Erro ao adicionar comentário:", error);
+    alert("Erro ao adicionar comentário");
+  }
+}
+
 
   const toggleComentarios = (postId: number) => {
     setMostrarComentarios({
@@ -187,7 +160,74 @@ export default function App() {
     });
   };
 
-  function handleChange(){}
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPostName(e.target.value);
+  };
+
+  const handleSubmitPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!novoPost.trim()) return;
+
+    const formData = new FormData(e.target as HTMLFormElement);  // Captura os campos do formulário automaticamente
+    formData.append("post_gender", postGender);  // Anexa o gênero (não está no form)
+    if (postImage) formData.append("post_image", postImage);  // Anexa a imagem se existir
+
+    try {
+      const response = await fetch("/api/communityPosts", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Limpar campos após sucesso
+        setNovoPost("");
+        setPostName("");
+        setPostImage(null);
+        // Recarregar posts após criar
+        window.location.reload(); // Ou busque novamente
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Erro ao criar post:", error);
+    }
+  };
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validação básica: apenas imagens, tamanho máximo 5MB
+      if (!file.type.startsWith("image/")) {
+        alert("Por favor, selecione um arquivo de imagem válido.");
+        return;
+      }
+      if (file.size > 12 * 1024 * 1024) {
+        // 5MB
+        alert("A imagem deve ter no máximo 12MB.");
+        return;
+      }
+      setPostImage(file);
+    }
+  }
+
+  function handleImageButtonClick() {
+    fileInputRef.current?.click(); // Abre o seletor de arquivos
+  }
+
+  const formatarData = (dataIso: string) => {
+    if (!dataIso || dataIso === "") return "Agora mesmo"; // Fallback para datas vazias
+    try {
+      const data = new Date(dataIso);
+      if (isNaN(data.getTime())) return "Data inválida";
+      return formatDistanceToNow(data, { addSuffix: true, locale: ptBR });
+    } catch {
+      return "Data inválida";
+    }
+  };
+
+  if (loading) return <div>Carregando...</div>;
+
+  console.log(posts)
 
   return (
     <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-blue-50">
@@ -324,25 +364,27 @@ export default function App() {
               transition={{ delay: 0.4, duration: 0.6 }}
             >
               <Card className="p-5 bg-white/90 backdrop-blur-sm border-slate-200 shadow-lg">
-                <form>
+                <form onSubmit={handleSubmitPost}>
                   <div className="flex content-center justify-center mb-2 gap-4">
                     <Avatar className="w-12 h-12">
                       <AvatarFallback className="bg-linear-to-br from-teal-400 to-cyan-500 text-white">
                         VC
                       </AvatarFallback>
                     </Avatar>
-                      <Input
-                        id="post_name"
-                        type="text"
-                        name="post_name"
-                        value={""}
-                        onChange={handleChange}
-                        placeholder="Digite o titulo da postagem"
-                        className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
-                      />
+                    <Input
+                      id="post_name"
+                      type="text"
+                      name="post_name"
+                      value={postName}
+                      onChange={handleChange}
+                      placeholder="Digite o titulo da postagem"
+                      className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
+                    />
                   </div>
                   <div>
                     <Textarea
+                      name="post_text"
+                      id="post_text"
                       placeholder="Compartilhe sua jornada de saúde..."
                       value={novoPost}
                       onChange={(e) => setNovoPost(e.target.value)}
@@ -350,10 +392,24 @@ export default function App() {
                     />
                   </div>
                   <div className="flex justify-between items-center mt-4">
-                    <Button className="text-slate-600 hover:text-teal-600 py-4 px-2">
+                    <Button
+                      type="button"
+                      onClick={handleImageButtonClick}
+                      className="text-slate-600 hover:text-teal-600 py-4 px-2"
+                    >
                       <Plus className="w-4 h-4 mr-2" />
-                      Adicionar imagem
+                      {postImage
+                        ? `Imagem selecionada: ${postImage.name}`
+                        : "Adicionar imagem"}
                     </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*" // Apenas imagens
+                        onChange={handleImageChange}
+                        style={{ display: "none" }} // Oculto
+                      />
+
                     <Button
                       type="submit"
                       className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md  py-2 px-4"
@@ -377,38 +433,54 @@ export default function App() {
                   {/* Header do Post */}
                   <div className="p-5">
                     <div className="flex items-start gap-3 mb-4">
-                      <Avatar className="w-11 h-11">
-                        <AvatarFallback className="bg-linear-to-br from-slate-200 to-slate-300 text-slate-700">
-                          {post.avatar}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="w-11 h-11">
+                        <Image 
+                          width={100}
+                          height={100}
+                          src={post.user_image}
+                          alt="Post"
+                          className="w-full rounded-full h-full object-cover hover:scale-105 transition-transform duration-50"                     
+                        />
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-slate-900">{post.autor}</p>
+                          <p className="text-slate-900">{post.user_name}</p>
                           <Badge
                             variant="secondary"
                             className="bg-linear-to-r from-teal-100 to-cyan-100 text-teal-700 border-0"
                           >
-                            {post.categoria}
+                            {post.gender}
                           </Badge>
                         </div>
-                        <p className="text-slate-500">{post.tempo}</p>
+                        <p className="text-slate-500">
+                          {formatarData(post.data)}
+                        </p>
                       </div>
                     </div>
 
+                    {post.name && (
+                      // <div className="border-b border-gray-300 mb-3">
+                        <h1 className="text-slate-700  text-[20px] leading-relaxed mb-0">
+                          {post.name}
+                        </h1>
+                      // </div>
+                    )}
+
                     <p className="text-slate-700 leading-relaxed mb-4">
-                      {post.conteudo}
+                      {post.text}
                     </p>
                   </div>
 
                   {/* Imagem do Post */}
-                  {post.imagem && (
+                  {post.image && (
                     <div className="relative h-72 overflow-hidden bg-slate-100">
-                      {/* <Image
-                                    src={post.imagem}
-                                    alt="Post"
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                                /> */}
+                      <Image
+                        width={100}
+                        height={100}
+                        src={post.image}
+                        alt="Post"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
                   )}
 
@@ -428,7 +500,7 @@ export default function App() {
                           }`}
                         />
                         <span className={post.curtido ? "text-red-500" : ""}>
-                          {post.curtidas}
+                          {post.likes}
                         </span>
                       </motion.button>
                       <motion.button
@@ -458,22 +530,26 @@ export default function App() {
                         <div className="space-y-3">
                           {post.comentarios.map((comentario) => (
                             <div key={comentario.id} className="flex gap-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarFallback className="bg-slate-100 text-slate-600">
-                                  {comentario.avatar}
-                                </AvatarFallback>
-                              </Avatar>
+                               <div className="relative rounded-full w-12 h-12 overflow-hidden bg-slate-100">
+                                  <Image
+                                    width={100}
+                                    height={100}
+                                    src={comentario.user_image}
+                                    alt="Foto do usuario do comentario"
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                  />
+                              </div>
                               <div className="flex-1 bg-linear-to-br from-slate-50 to-slate-100/50 rounded-xl p-3">
                                 <div className="flex items-center gap-2 mb-1">
                                   <p className="text-slate-900">
-                                    {comentario.autor}
+                                    {comentario.user_name}
                                   </p>
                                   <p className="text-slate-500">
-                                    {comentario.tempo}
+                                    {formatarData(comentario.comentario_data)}
                                   </p>
                                 </div>
                                 <p className="text-slate-700">
-                                  {comentario.conteudo}
+                                  {comentario.comentario_text}
                                 </p>
                               </div>
                             </div>
@@ -487,28 +563,19 @@ export default function App() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 flex gap-2">
-                              <Input
+                              <InputRef
                                 type="text"
                                 placeholder="Adicione um comentário..."
-                                value={novoComentario[post.id] || ""}
-                                onChange={(e) =>
-                                  setNovoComentario({
-                                    ...novoComentario,
-                                    [post.id]: e.target.value,
-                                  })
-                                }
-                                className="border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-white"
-                                onKeyPress={(e) => {
-                                  if (e.key === "Enter") {
-                                    handleAdicionarComentario(post.id);
-                                  }
+                                ref={(element: HTMLInputElement | null) => {
+                                  comentarioRefs.current[post.id] = element;
                                 }}
+                                className="border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-white"
                               />
                               <Button
                                 onClick={() =>
                                   handleAdicionarComentario(post.id)
                                 }
-                                className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md"
+                                className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md py-2 px-4"
                               >
                                 Enviar
                               </Button>

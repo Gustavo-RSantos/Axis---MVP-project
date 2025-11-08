@@ -59,7 +59,7 @@ model postagens {
   post_name            String?                @db.VarChar(30)
   post_text            String?                @db.Text
   post_data            DateTime?              @db.DateTime(0)
-  post_image           Bytes?                 @db.Blob
+  post_image           Bytes?                 @db.MediumBlob
   post_gender          String?                @db.VarChar(30)
   postagem_comentarios postagem_comentarios[]
   postagem_likes       postagem_likes[]

@@ -4,3 +4,5 @@
 
 -- INSERT INTO calendarios 
 -- VALUES (1, 24, 2025-11-04, "Urologista")
+
+SELECT * from postagens
