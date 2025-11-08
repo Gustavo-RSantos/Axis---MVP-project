@@ -49,14 +49,14 @@ interface Post {
 export default function App() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [novoPost, setNovoPost] = useState("");
-  const [postName, setPostName] = useState(""); // Novo estado para título
-  const [postGender, setPostGender] = useState("Geral"); // Categoria
+  const [postName, setPostName] = useState("");
+  const [postGender, setPostGender] = useState("Geral"); 
   const [postImage, setPostImage] = useState<File | null>(null);
   const [mostrarComentarios, setMostrarComentarios] = useState<{
     [key: number]: boolean;
   }>({});
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref para o input de arquivo
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const comentarioRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   useEffect(() => { 
