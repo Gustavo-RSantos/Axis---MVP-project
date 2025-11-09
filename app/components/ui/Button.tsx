@@ -1,3 +1,5 @@
+"use client"
+
 import { cn } from "./utils";
 
 export default function Button_nav({className, ...props} : React.ComponentProps<"button">){

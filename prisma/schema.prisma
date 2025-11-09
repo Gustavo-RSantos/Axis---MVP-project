@@ -16,6 +16,7 @@ model cadastros {
   user_secondname      String?                @db.VarChar(30)
   user_phone           String?                @db.VarChar(15)
   user_password_hash   String?                @db.VarChar(100)
+  artigos_favoritos    artigos_favoritos?
   calendarios          calendarios[]
   perfis               perfis?
   postagem_comentarios postagem_comentarios[]
@@ -78,4 +79,24 @@ model postagem_likes {
 
   @@index([post_id], map: "post_id")
   @@index([user_id], map: "user_id")
+}
+
+model artigos {
+  artigos_id          Int                 @id @default(autoincrement())
+  artigos_gender      String?             @db.VarChar(45)
+  artigos_titulo      String?             @db.VarChar(45)
+  artigos_description String?             @db.VarChar(45)
+  artigos_url         String?             @unique(map: "artigos_url_UNIQUE") @db.VarChar(45)
+  artigos_image       Bytes?              @db.MediumBlob
+  artigos_autor       String?             @db.VarChar(45)
+  artigos_favoritos   artigos_favoritos[]
+}
+
+model artigos_favoritos {
+  user_id    Int       @id
+  artigos_id Int?
+  cadastros  cadastros @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "artigos_favoritos_ibfk_1")
+  artigos    artigos?  @relation(fields: [artigos_id], references: [artigos_id], onDelete: NoAction, onUpdate: NoAction, map: "artigos_favoritos_ibfk_2")
+
+  @@index([artigos_id], map: "artigos_id")
 }

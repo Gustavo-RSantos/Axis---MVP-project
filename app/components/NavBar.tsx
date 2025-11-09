@@ -30,21 +30,22 @@ export function NavBar() {
       </div>
       {/* Right side - Menu */}
       <nav className="flex items-center space-x-6">
-        <Link href={"/Comunidades"}>
-          <button className="flex items-center text-white space-x-1 cursor-pointer hover:underline">
-            <FaUsers />
-            <span>Comunidade</span>
-          </button>
-        </Link>
-        <Link href={"/Artigos"}>
-          <button className="flex items-center text-white space-x-1 cursor-pointer hover:underline">
-            <FaBookOpen />
-            <span>Artigos</span>
-          </button>
-        </Link>
-
         {user ? (
-          <UserProfile />
+          <>
+            <Link href={"/Comunidades"}>
+              <button className="flex items-center text-white space-x-1 cursor-pointer hover:underline">
+                <FaUsers />
+                <span>Comunidade</span>
+              </button>
+            </Link>
+            <Link href={"/Artigos"}>
+              <button className="flex items-center text-white space-x-1 cursor-pointer hover:underline">
+                <FaBookOpen />
+                <span>Artigos</span>
+              </button>
+            </Link>
+            <UserProfile />
+          </>
         ) : (
             <div>
             <Link href={"/Login"}>

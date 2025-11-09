@@ -18,7 +18,6 @@ import { Avatar, AvatarFallback } from "../components/ui/Avatar";
 import Separator from "../components/ui/Separator";
 import { Badge } from "../components/ui/Badge";
 import Button from "../components/ui/Button";
-import Input from "../components/ui/Input";
 import Textarea from "../components/ui/TextArea";
 import Card from "../components/ui/Post_Card";
 import Image from "next/image";
@@ -48,7 +47,7 @@ interface Post {
 
 export default function App() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [postGender, setPostGender] = useState("Geral"); 
+  // const [postGender, setPostGender] = useState("Geral"); 
   const [postImage, setPostImage] = useState<File | null>(null);
   const [mostrarComentarios, setMostrarComentarios] = useState<{
     [key: number]: boolean;
@@ -115,11 +114,10 @@ export default function App() {
       const response = await fetch(`/api/communityPosts/${postId}/comments`);
       const data = await response.json();
       if (data.success) {
-        // Atualiza apenas os comentários do post específico no estado
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.id === postId
-              ? { ...post, comentarios: data.comments } // Substitui os comentários com os dados do servidor
+              ? { ...post, comentarios: data.comments } 
               : post
           )
         );

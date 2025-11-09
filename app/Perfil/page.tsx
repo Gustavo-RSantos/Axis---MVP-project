@@ -5,18 +5,17 @@ import { useEffect, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 
 import Card_Exames from "../components/ui/Card_Exames";
-import Card_Artigos from "../components/ui/Card_Artigos";
 import { ProfileCard } from "../components/ui/ProfileCard";
 import testeArtigos from "../assets/banner-tester.png";
 import Link from "next/link";
 import { radixSort } from "../script/radixSort";
+import { ArticleCard } from "../components/Card_Artigos";
 
 interface Event {
   calendar_id: number;
   calendar_consulta: string;
   calendar_data: string;
 }
-
 
 export default function Perfil() {
   const [userData, setUserData] = useState({
@@ -55,9 +54,8 @@ export default function Perfil() {
           }
 
           console.log("URL da IMAGEM : ", imageUrl);
-          
-          const sortedCalendario = radixSort(userData.calendarios || []);
 
+          const sortedCalendario = radixSort(userData.calendarios || []);
 
           setUserData({
             user_firstName: userData.user_firstName || "",
@@ -66,11 +64,10 @@ export default function Perfil() {
             user_age: userData.user_age || 0,
             user_name: userData.user_name,
             user_image: imageUrl,
-            calendario: sortedCalendario
+            calendario: sortedCalendario,
           });
 
           console.log("Dados do calendario recebidos:", userData.calendario);
-
         } else {
           console.error("Erro ao carregar dados:", userData.message);
         }
@@ -83,43 +80,57 @@ export default function Perfil() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
+  };
+
+  const genderColors: Record<string, string> = {
+    Fitness: "from-orange-500 to-red-500",
+    Nutrição: "from-green-500 to-emerald-500",
+    "Bem-estar": "from-purple-500 to-pink-500",
+    "Saúde Mental": "from-blue-500 to-cyan-500",
+    Sono: "from-indigo-500 to-purple-500",
   };
 
   const [articles] = useState([
     {
       id: 1,
       title: "Como Manter uma Dieta Equilibrada no Dia a Dia",
+      description: "Só pra teste",
       author: "Dr. Carlos Mendes",
-      readTime: "5 min",
+      gender: "Saúde Mental",
       category: "Nutrição",
-      imageUrl: testeArtigos.src,
+      url:"teste",
+      image: testeArtigos.src,
     },
     {
       id: 2,
       title: "A Importância do Check-up Anual para sua Saúde",
+      description: "Só pra teste",
       author: "Dra. Ana Paula Silva",
-      readTime: "7 min",
+      gender: "Saúde Mental",
       category: "Prevenção",
-      imageUrl: testeArtigos.src,
+      url:"teste",
+      image: testeArtigos.src,
     },
     {
       id: 3,
       title: "Bem-estar Mental: Práticas para uma Vida Mais Saudável",
+      description: "Só pra teste",
       author: "Dra. Juliana Santos",
-      readTime: "6 min",
+      gender: "Saúde Mental",
       category: "Bem-estar",
-      imageUrl: testeArtigos.src,
+      url:"teste",
+      image: testeArtigos.src,
     },
   ]);
 
@@ -168,14 +179,12 @@ export default function Perfil() {
         <section className="mb-12">
           <h3 className="text-gray-900 mb-6">Artigos favoritos</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <Card_Artigos
+            {articles.map((article, index) => (
+              <ArticleCard
                 key={article.id}
-                title={article.title}
-                author={article.author}
-                readTime={article.readTime}
-                category={article.category}
-                imageUrl={article.imageUrl}
+                article={article}
+                genderColor={genderColors[article.gender]}
+                index={index}
               />
             ))}
           </div>
