@@ -1,7 +1,7 @@
 "use client"
 import { motion } from "motion/react"
 import Card from "./components/ui/Card"
-import testeImage from "./assets/images.jpeg"
+import testeImage from "./assets/bannerComunidadeLandingPage.png"
 import Carrocel from "./components/ui/Carrocel";
 
 

@@ -42,7 +42,7 @@ const genderColors: Record<string, string> = {
   Fitness: "from-orange-500 to-red-500",
   Nutrição: "from-green-500 to-emerald-500",
   "Bem-estar": "from-purple-500 to-pink-500",
-  "Saúde mental": "from-blue-500 to-cyan-500",
+  "Saúde Mental": "from-blue-500 to-cyan-500",
   Sono: "from-indigo-500 to-purple-500",
 };
 
