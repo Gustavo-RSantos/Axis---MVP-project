@@ -48,18 +48,20 @@ interface Post {
 
 export default function App() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [novoPost, setNovoPost] = useState("");
-  const [postName, setPostName] = useState("");
   const [postGender, setPostGender] = useState("Geral"); 
   const [postImage, setPostImage] = useState<File | null>(null);
   const [mostrarComentarios, setMostrarComentarios] = useState<{
     [key: number]: boolean;
   }>({});
   const [loading, setLoading] = useState(true);
+
+  const postInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const postTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const comentarioRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   useEffect(() => { 
+    console.log("useEffect executado - buscando posts");
     const fetchPosts = async () => {
       try {
         const response = await fetch("/api/communityPosts");
@@ -77,6 +79,8 @@ export default function App() {
     };
     fetchPosts();
   }, []);
+
+
 
   async function handleCurtir(postId: number) {
     try {
@@ -105,8 +109,31 @@ export default function App() {
     }
   }
 
+    async function fetchComentarios(postId: number){
+      
+    try {
+      const response = await fetch(`/api/communityPosts/${postId}/comments`);
+      const data = await response.json();
+      if (data.success) {
+        // Atualiza apenas os comentários do post específico no estado
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? { ...post, comentarios: data.comments } // Substitui os comentários com os dados do servidor
+              : post
+          )
+        );
+      } else {
+        console.error("Erro ao buscar comentários:", data.message);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar comentários:", error);
+    }
+  };
+
   async function handleAdicionarComentario(postId: number) {
 
+  //Caso o input venha vazio, ele não envia nada para o banco
   const inputElement = comentarioRefs.current[postId];
   const comentarioTexto = inputElement?.value.trim() || "";
 
@@ -119,9 +146,23 @@ export default function App() {
       body: JSON.stringify({ content: comentarioTexto }),
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      console.error("Erro na resposta:", response.status, response.statusText);
+      alert(`Erro: ${response.status} - ${response.statusText}`);
+      return;
+    }
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error("Resposta não é JSON:", await response.text());
+      alert("Erro: Resposta inválida do servidor");
+      return;
+    }
 
+    const data = await response.json();
+    
     if (data.success && data.comment) {
+      const userImage = data.comment.user_image && data.comment.user_image !== "" ? data.comment.user_image : null;
+
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId
@@ -132,7 +173,7 @@ export default function App() {
                   {
                     id: data.comment.comentario_id,
                     user_name: data.comment.user_name,
-                    user_image: data.comment.user_image,
+                    user_image: userImage,
                     comentario_text: comentarioTexto,
                     comentario_data: new Date().toISOString(),
                   },
@@ -141,8 +182,11 @@ export default function App() {
             : post
         )
       );
+
       // Limpar o campo após enviar
       if (inputElement) inputElement.value = "";
+
+      await fetchComentarios(postId);
     } else {
       alert("Erro ao adicionar comentário: " + (data.message || "Resposta inválida"));
     }
@@ -160,31 +204,26 @@ export default function App() {
     });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPostName(e.target.value);
-  };
-
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!novoPost.trim()) return;
-
-    const formData = new FormData(e.target as HTMLFormElement);  // Captura os campos do formulário automaticamente
-    formData.append("post_gender", postGender);  // Anexa o gênero (não está no form)
-    if (postImage) formData.append("post_image", postImage);  // Anexa a imagem se existir
+    // Captura o valor diretamente do textarea via ref (opcional, pois FormData já pega)
+    const postText = postTextAreaRef.current?.value.trim();
+    if (!postText) return;
+    const formData = new FormData(e.target as HTMLFormElement);
+    console.log("FormData contents:", [...formData.entries()]);  // Veja o que está sendo enviado
 
     try {
       const response = await fetch("/api/communityPosts", {
         method: "POST",
         body: formData,
       });
+      
       const data = await response.json();
       if (data.success) {
-        // Limpar campos após sucesso
-        setNovoPost("");
-        setPostName("");
-        setPostImage(null);
-        // Recarregar posts após criar
-        window.location.reload(); // Ou busque novamente
+
+        if (postInputRef.current) postInputRef.current.value = "";
+        if (postTextAreaRef.current) postTextAreaRef.current.value = "";
+        window.location.reload();
       } else {
         alert(data.message);
       }
@@ -226,8 +265,6 @@ export default function App() {
   };
 
   if (loading) return <div>Carregando...</div>;
-
-  console.log(posts)
 
   return (
     <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-blue-50">
@@ -371,13 +408,13 @@ export default function App() {
                         VC
                       </AvatarFallback>
                     </Avatar>
-                    <Input
+                    <InputRef
                       id="post_name"
                       type="text"
                       name="post_name"
-                      value={postName}
-                      onChange={handleChange}
+                      ref={postInputRef}
                       placeholder="Digite o titulo da postagem"
+                      maxLength={50}
                       className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
                     />
                   </div>
@@ -386,8 +423,7 @@ export default function App() {
                       name="post_text"
                       id="post_text"
                       placeholder="Compartilhe sua jornada de saúde..."
-                      value={novoPost}
-                      onChange={(e) => setNovoPost(e.target.value)}
+                      ref={postTextAreaRef}
                       className="min-h-20 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
                     />
                   </div>
@@ -405,6 +441,7 @@ export default function App() {
                       <input
                         ref={fileInputRef}
                         type="file"
+                        name="post_image"
                         accept="image/*" // Apenas imagens
                         onChange={handleImageChange}
                         style={{ display: "none" }} // Oculto

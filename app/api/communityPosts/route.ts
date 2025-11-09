@@ -12,6 +12,7 @@ export interface PostDataProps {
 
 // GET: Buscar todos os posts com comentários e likes
 export async function GET() {
+  console.log("API GET chamada");
   try {
     const payload = await getUserFromCookie(); // Para verificar likes do usuário atual
 

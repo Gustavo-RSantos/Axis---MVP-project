@@ -56,7 +56,7 @@ model postagem_comentarios {
 model postagens {
   post_id              Int                    @id @default(autoincrement())
   user_id              Int?
-  post_name            String?                @db.VarChar(30)
+  post_name            String?                @db.VarChar(50)
   post_text            String?                @db.Text
   post_data            DateTime?              @db.DateTime(0)
   post_image           Bytes?                 @db.MediumBlob

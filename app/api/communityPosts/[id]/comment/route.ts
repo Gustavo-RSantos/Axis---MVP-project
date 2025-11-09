@@ -26,11 +26,91 @@ export async function POST(request: Request, { params }: { params: { id: string 
         comentario_text: content,
         comentario_data: new Date(),
       },
+      include: {
+        cadastros: {
+          include: {
+            perfis: {
+              select: {
+                user_name: true,
+                user_image: true,
+              },
+            },
+          },
+        },
+      },
     });
+     let userImage = null;
 
-    return NextResponse.json({ success: true, comment: newComment });
+      if (newComment.cadastros?.perfis?.user_image) {
+        const buffer = Buffer.from(newComment.cadastros.perfis.user_image);
+        userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+      }
+
+      const formattedComment = {
+        comentario_id: newComment.comentario_id,
+        user_name: newComment.cadastros?.perfis?.user_name || "Usuário Anônimo",
+        user_image: userImage, // Já tratado como null se não existir
+        comentario_text: newComment.comentario_text,
+        comentario_data: newComment.comentario_data?.toISOString(),
+      };
+
+    return NextResponse.json({ success: true, comment: formattedComment });
   } catch (error) {
     console.error("Erro ao adicionar comentário:", error);
     return NextResponse.json({ success: false, message: "Erro ao adicionar comentário" }, { status: 500 });
+  }
+}
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const { id } = await params;
+    const postId = parseInt(id, 10);
+    if (isNaN(postId) || postId <= 0) {
+      return NextResponse.json(
+        { success: false, message: "ID do post inválido" },
+        { status: 400 }
+      );
+    }
+
+    // Busca os comentários do post, incluindo dados do usuário via cadastros e perfis
+    const comments = await prisma.postagem_comentarios.findMany({
+      where: { post_id: postId },
+      include: {
+        cadastros: {
+          include: {
+            perfis: {
+              select: {
+                user_name: true,
+                user_image: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { comentario_data: "asc" }, // Ordena por data (mais antigo primeiro)
+    });
+
+    // Formata os comentários para o frontend
+    const formattedComments = comments.map((comment) => {
+      // Converte user_image (blob) para base64 se existir
+      let userImage = null;
+      if (comment.cadastros?.perfis?.user_image) {
+        const buffer = Buffer.from(comment.cadastros.perfis.user_image);
+        userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`; // Ajuste o MIME type se necessário (ex.: image/png)
+      }
+
+      return {
+        id: comment.comentario_id,
+        user_name: comment.cadastros?.perfis?.user_name || "Usuário Anônimo", // Fallback se não houver perfil
+        user_image: userImage || null, // Fallback para imagem padrão se não houver
+        comentario_text: comment.comentario_text || "",
+        comentario_data: comment.comentario_data?.toISOString() || new Date().toISOString(),
+      };
+    });
+
+    return NextResponse.json({ success: true, comments: formattedComments });
+  } catch (error) {
+    console.error("Erro ao buscar comentários:", error);
+    return NextResponse.json({ success: false, message: "Erro ao buscar comentários" }, { status: 500 });
   }
 }
