@@ -5,9 +5,6 @@ import { motion } from "motion/react";
 import { BookOpen, Search, Filter } from "lucide-react";
 import { ArticleCard } from "../components/Card_Artigos";
 import Input from "../components/ui/Input";
-
-// import imageBase from "../assets/bannerArtigos_2.jpg";
-
 import {
   Select,
   SelectContent,
@@ -16,6 +13,11 @@ import {
   SelectValue,
 } from "../components/ui/Select";
 
+import bannerFitness from '../assets/imagens para o projeto/imagemArtigosFitness.png'
+import bannerNutricao from '../assets/imagens para o projeto/imagemArtigosNutrição.png'
+import bannerBemEstar from '../assets/imagens para o projeto/imagemArtigosBemStar.png'
+import bannerSaudeMental from '../assets/imagens para o projeto/imagemArtigosSaúdeMental.png'
+import bannerSono from '../assets/imagens para o projeto/imagemArtigosSono.png'
 interface ApiArticle {
   artigos_id: number;
   artigos_gender: string;
@@ -25,7 +27,6 @@ interface ApiArticle {
   artigos_description: string;
   artigos_url: string;
 }
-// Interface para o artigo no componente (compatível com ArticleCard)
 interface Article {
   id: number;
   title: string;
@@ -34,9 +35,8 @@ interface Article {
   gender: string;
   date: string;
   image: string;
-  url: string; // Adicionado para o link, se precisar
+  url: string; 
 }
-
 
 const genderColors: Record<string, string> = {
   Fitness: "from-orange-500 to-red-500",
@@ -53,6 +53,23 @@ export default function App() {
   const [loading, setLoading] = useState(true); // Estado para loading
   const [error, setError] = useState<string | null>(null); // Estado para erro
 
+  function getDefaultImage(gender: string): string {
+    switch (gender.toLowerCase()) {
+      case 'fitness':
+        return bannerFitness.src;
+      case 'nutrição':
+        return bannerNutricao.src;
+      case 'bem-estar':
+        return bannerBemEstar.src;
+      case 'saúde mental':
+        return bannerSaudeMental.src;
+      case 'sono':
+        return bannerSono.src;
+      default:
+        return bannerFitness.src; // Imagem genérica para gêneros não previstos
+    }
+  }
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -65,20 +82,21 @@ export default function App() {
         }
         const data = await response.json();
 
-                if (data.success) {
+        if (data.success) {
           // Mapeie os dados da API para o formato esperado
-          const mappedArticles: Article[] = data.artigos.map((apiArticle: ApiArticle) => ({
-            id: apiArticle.artigos_id,
-            title: apiArticle.artigos_titulo,
-            author: apiArticle.artigos_autor, // Valor padrão, já que a API não fornece
-            description: apiArticle.artigos_description,
-            gender: apiArticle.artigos_gender,
-            readTime: "5 min", // Valor padrão
-            date: new Date().toISOString().split('T')[0], // Data atual como padrão
-            image: apiArticle.artigos_image, // Imagem padrão
-            url: apiArticle.artigos_url, // Para link, se usado no ArticleCard
-          }));
-          console.log(mappedArticles)
+          const mappedArticles: Article[] = data.artigos.map(
+            (apiArticle: ApiArticle) => ({
+              id: apiArticle.artigos_id,
+              title: apiArticle.artigos_titulo,
+              author: apiArticle.artigos_autor, 
+              description: apiArticle.artigos_description,
+              gender: apiArticle.artigos_gender,
+              date: new Date().toISOString().split("T")[0], 
+              image: apiArticle.artigos_image === undefined ? getDefaultImage(apiArticle.artigos_gender) : apiArticle.artigos_image,
+              url: apiArticle.artigos_url, 
+            })
+          );
+          console.log(mappedArticles);
           setArticles(mappedArticles);
         } else {
           setError(data.message || "Erro ao carregar artigos");
@@ -117,16 +135,14 @@ export default function App() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-blue-50">
-      {/* Decorative Background Pattern */}
+
       <div className="fixed inset-0 pointer-events-none opacity-30">
         <div className="absolute top-0 left-0 w-96 h-96 bg-linear-to-br  from-teal-400/20 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-linear-to-tl from-blue-400/20 to-transparent rounded-full blur-3xl" />
       </div>
 
-      {/* Hero Section */}
       <motion.section
         className="relative py-20 overflow-hidden"
         initial={{ opacity: 0 }}
@@ -159,7 +175,7 @@ export default function App() {
         </div>
       </motion.section>
 
-      {/* Search and Filter Section */}
+      
       <div className="relative max-w-7xl mx-auto px-6 mb-8 mt-4">
         <motion.div
           className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
@@ -228,7 +244,6 @@ export default function App() {
         </motion.div>
       </div>
 
-      {/* Articles Grid */}
       <div className="relative max-w-7xl mx-auto px-6 pb-16">
         {filteredArticles.length === 0 ? (
           <motion.div
@@ -246,7 +261,9 @@ export default function App() {
               <ArticleCard
                 key={article.id}
                 article={article}
-                genderColor={genderColors[article.gender] || "from-gray-500 to-gray-500"}
+                genderColor={
+                  genderColors[article.gender] || "from-gray-500 to-gray-500"
+                }
                 index={index}
               />
             ))}

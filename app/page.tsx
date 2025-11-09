@@ -1,8 +1,11 @@
 "use client"
 import { motion } from "motion/react"
 import Card from "./components/ui/Card"
-import testeImage from "./assets/bannerComunidadeLandingPage.png"
 import Carrocel from "./components/ui/Carrocel";
+
+import banner_1 from "./assets/bannerHome_1.jpg"
+import banner_2 from "./assets/bannerHome_2.jpg"
+import banner_3 from "./assets/bannerHome_3.jpg"
 
 
 export default function Home() {
@@ -40,9 +43,8 @@ export default function Home() {
                     icon={"Calendar"} 
                     direction={"right"}
                     color={"green"}
-
                     title={"Agendamento"} 
-                    image={testeImage}
+                    image={banner_1}
                     subTitle={"Lembrete de exames"} 
                     desc={"Local para marcar datas de seus exames e evitar esquecimentos."} 
                     contentList_1={"Interface intuitiva para gerenciar datas"} 
@@ -55,9 +57,8 @@ export default function Home() {
                     icon={"BookOpen"} 
                     direction={"left"} 
                     color={"blue"}
-
                     title={"Conteúdo"} 
-                    image={testeImage} 
+                    image={banner_2} 
                     subTitle={"Acesso a artigos"} 
                     desc={"Conteúdos sobre saúde masculina em um só lugar."} 
                     contentList_1={"Artigos científicos e matérias atualizadas"} 
@@ -70,9 +71,8 @@ export default function Home() {
                     icon={"Users"} 
                     direction={"right"}
                     color={"purple"} 
-
                     title={"Comunidade"} 
-                    image={testeImage} 
+                    image={banner_3} 
                     subTitle={"Participe de nossas comunidades"} 
                     desc={"Conviva com outras pessoas em um ambiente de diálogo seguro."} 
                     contentList_1={"Interaja sobre temas de interesse"} 

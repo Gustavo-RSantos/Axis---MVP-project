@@ -3,14 +3,13 @@ import { ArrowRight, User, Tag } from "lucide-react";
 import { Card } from "./ui/Card_Artigos_Rep";
 import Button from "./ui/Button"
 import { Badge } from "./ui/Badge";
-import Image from "next/image";
-
+import { StaticImageData } from "next/image";
 interface Article {
   id: number;
   title: string;
   author: string;
   description: string;
-  image: string;
+  image: string | StaticImageData;
   gender: string;
   url: string;
 }
@@ -38,14 +37,10 @@ export function ArticleCard({ article, genderColor, index }: ArticleCardProps) {
         <div className={`h-1 bg-linear-to-r ${genderColor}`} />
         
         {/* Banner Image */}
-        <div className="relative h-48 overflow-hidden bg-slate-100">
-          <Image
-            width={100}
-            height={100}
-            src={article.image}
-            alt={article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+        <div 
+          className="relative h-48 overflow-hidden bg-slate-100 bg-cover bg-center"
+          style={{backgroundImage: `url(${article.image})`}}
+        >
         </div>
         
         <div className="p-6 flex flex-col">

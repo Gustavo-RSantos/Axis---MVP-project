@@ -1,6 +1,7 @@
 import { motion } from "motion/react"
 import { Calendar, CheckCircle2, Users, BookOpen } from 'lucide-react';
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
+import { useEffect, useState } from "react";
 
 interface cardProps{
     icon: string,
@@ -30,6 +31,21 @@ export default function Card({
     contentList_3,
 
 } : cardProps){
+
+  function useWindowSize() {
+        const [size, setSize] = useState({ width: 0 });
+        useEffect(() => {
+            function updateSize() {
+                setSize({ width: window.innerWidth });
+            }
+            window.addEventListener('resize', updateSize);
+            updateSize(); // Inicializa
+            return () => window.removeEventListener('resize', updateSize);
+        }, []);
+        return size;
+    }
+
+    const { width } = useWindowSize(); // Usando o hook
 
     const fadeInUp = {
     initial: { opacity: 0, y: 60 },
@@ -80,17 +96,11 @@ export default function Card({
 
    const ImageBlock = (
         <motion.div
-        className="relative group overflow-hidden rounded-2xl shadow-2xl h-[350px]"
+        className="relative group overflow-hidden bg-cover rounded-2xl shadow-2xl h-[350px]"
+        style={{backgroundImage: `url(${image.src})`}}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.3 }}
         >
-        <Image
-            src={image}
-            width={100}
-            height={100}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
         <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </motion.div>
      );
@@ -116,9 +126,12 @@ export default function Card({
         </div>
     );
 
+  const showImageFirst = direction === "right" || width < 768;
+
+
   return (
     <motion.section className="grid md:grid-cols-2 gap-12 items-center" {...fadeInUp}>
-      {direction === "right" ? (
+      {showImageFirst ? (
         <>
           {ImageBlock}
           {TextBlock}
