@@ -15,7 +15,7 @@ function getDigit(num: number, i: number): number {
 
 function mostDigits(arr: number[]): number {
     let max = -Infinity;
-    for (let element of arr) {
+    for (const element of arr) {
         max = Math.max(max, countDigits(element));
     }
     return max;
@@ -23,31 +23,27 @@ function mostDigits(arr: number[]): number {
 
 export function radixSort(dates: Event[]): Event[] {
     const now: number = new Date().getTime();
-
     const futureEvents: Event[] = dates.filter(event => new Date(event.calendar_data).getTime() >= now);
+    if (futureEvents.length === 0) return [];
 
-    const timestamps: number[] = futureEvents.map(event => new Date(event.calendar_data).getTime());
+    let items = futureEvents.map(event => ({
+        event,
+        timestamp: new Date(event.calendar_data).getTime()
+    }));
 
-    if (timestamps.length === 0) return [];  
-
+    const timestamps: number[] = items.map(item => item.timestamp);
     const maxDigitCount = mostDigits(timestamps);
-
     for (let i = 0; i < maxDigitCount; i++) {
-        let digitBuckets: Array<Array<{ event: Event; timestamp: number }>> = Array.from({ length: 10 }, () => []);
-
-        for (let j = 0; j < futureEvents.length; j++) {
-            let digit = getDigit(timestamps[j], i);
-            digitBuckets[digit].push({ event: futureEvents[j], timestamp: timestamps[j] });
+        const digitBuckets: Array<Array<{ event: Event; timestamp: number }>> = Array.from({ length: 10 }, () => []);
+        for (const item of items) {
+            const digit = getDigit(item.timestamp, i);
+            digitBuckets[digit].push(item);
         }
 
-        // Reordenar o array futureEvents baseado nos buckets
-        futureEvents.length = 0;  // Limpar o array
-        for (let bucket of digitBuckets) {
-            for (let item of bucket) {
-                futureEvents.push(item.event);
-            }
+        items = [];
+        for (const bucket of digitBuckets) {
+            items.push(...bucket);
         }
     }
-
-    return futureEvents;  // Retornar o array ordenado de eventos futuros
+    return items.map(item => item.event);
 }

@@ -13,11 +13,17 @@ import {
   SelectValue,
 } from "../components/ui/Select";
 
-import bannerFitness from '../assets/imagens para o projeto/imagemArtigosFitness.png'
-import bannerNutricao from '../assets/imagens para o projeto/imagemArtigosNutrição.png'
-import bannerBemEstar from '../assets/imagens para o projeto/imagemArtigosBemStar.png'
-import bannerSaudeMental from '../assets/imagens para o projeto/imagemArtigosSaúdeMental.png'
-import bannerSono from '../assets/imagens para o projeto/imagemArtigosSono.png'
+import bannerFitness from "../assets/imagensArtigos/imagemArtigosFitness.png";
+import bannerNutricao from "../assets/imagensArtigos/imagemArtigosNutrição.png";
+import bannerBemEstar from "../assets/imagensArtigos/imagemArtigosBemStar.png";
+import bannerSaudeMental from "../assets/imagensArtigos/imagemArtigosSaúdeMental.png";
+import bannerSono from "../assets/imagensArtigos/imagemArtigosSono.png";
+import bannerEnvelhecimento from "../assets/imagensArtigos/bannerEnvelhecimento.jpg";
+import bannerSaudeFisica from "../assets/imagensArtigos/bannerSaudeFisica.jpg";
+import bannerSaudeIntelectual from "../assets/imagensArtigos/bannerSaudeIntelectual.jpg";
+import bannerSaudePreventiva from "../assets/imagensArtigos/bannerSaudePreventiva.jpg";
+import bannerSaudePublica from "../assets/imagensArtigos/bannerSaudePublica.jpg";
+import bannerVicio from "../assets/imagensArtigos/bannerVicio.jpg";
 interface ApiArticle {
   artigos_id: number;
   artigos_gender: string;
@@ -35,7 +41,7 @@ interface Article {
   gender: string;
   date: string;
   image: string;
-  url: string; 
+  url: string;
 }
 
 const genderColors: Record<string, string> = {
@@ -44,6 +50,12 @@ const genderColors: Record<string, string> = {
   "Bem-estar": "from-purple-500 to-pink-500",
   "Saúde Mental": "from-blue-500 to-cyan-500",
   Sono: "from-indigo-500 to-purple-500",
+  Envelhecimento: "from-amber-500 to-yellow-600",
+  "Saúde Preventiva": "from-teal-500 to-emerald-500",
+  "Saúde Pública": "from-blue-600 to-sky-400",
+  Vício: "from-rose-600 to-red-500",
+  "Saúde Física": "from-red-500 to-amber-500",
+  "Saúde Intelectual": "from-violet-500 to-fuchsia-500",
 };
 
 export default function App() {
@@ -55,16 +67,28 @@ export default function App() {
 
   function getDefaultImage(gender: string): string {
     switch (gender.toLowerCase()) {
-      case 'fitness':
+      case "fitness":
         return bannerFitness.src;
-      case 'nutrição':
+      case "nutrição":
         return bannerNutricao.src;
-      case 'bem-estar':
+      case "bem-estar":
         return bannerBemEstar.src;
-      case 'saúde mental':
+      case "saúde mental":
         return bannerSaudeMental.src;
-      case 'sono':
+      case "sono":
         return bannerSono.src;
+      case "envelhecimento":
+        return bannerEnvelhecimento.src;
+      case "saúde física":
+        return bannerSaudeFisica.src;
+      case "saúde intelectual":
+        return bannerSaudeIntelectual.src;
+      case "saúde preventiva":
+        return bannerSaudePreventiva.src;
+      case "saúde pública":
+        return bannerSaudePublica.src;
+      case "vício":
+        return bannerVicio.src;
       default:
         return bannerFitness.src; // Imagem genérica para gêneros não previstos
     }
@@ -88,12 +112,15 @@ export default function App() {
             (apiArticle: ApiArticle) => ({
               id: apiArticle.artigos_id,
               title: apiArticle.artigos_titulo,
-              author: apiArticle.artigos_autor, 
+              author: apiArticle.artigos_autor,
               description: apiArticle.artigos_description,
               gender: apiArticle.artigos_gender,
-              date: new Date().toISOString().split("T")[0], 
-              image: apiArticle.artigos_image === undefined ? getDefaultImage(apiArticle.artigos_gender) : apiArticle.artigos_image,
-              url: apiArticle.artigos_url, 
+              date: new Date().toISOString().split("T")[0],
+              image:
+                apiArticle.artigos_image === undefined
+                  ? getDefaultImage(apiArticle.artigos_gender)
+                  : apiArticle.artigos_image,
+              url: apiArticle.artigos_url,
             })
           );
           console.log(mappedArticles);
@@ -137,7 +164,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-blue-50">
-
       <div className="fixed inset-0 pointer-events-none opacity-30">
         <div className="absolute top-0 left-0 w-96 h-96 bg-linear-to-br  from-teal-400/20 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-linear-to-tl from-blue-400/20 to-transparent rounded-full blur-3xl" />
@@ -175,7 +201,6 @@ export default function App() {
         </div>
       </motion.section>
 
-      
       <div className="relative max-w-7xl mx-auto px-6 mb-8 mt-4">
         <motion.div
           className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
@@ -236,6 +261,44 @@ export default function App() {
                     value="Sono"
                   >
                     Sono
+                  </SelectItem>
+
+                  {/* Novos gêneros adicionados */}
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Envelhecimento"
+                  >
+                    Envelhecimento
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Saúde Preventiva"
+                  >
+                    Saúde Preventiva
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Saúde Pública"
+                  >
+                    Saúde Pública
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Vício"
+                  >
+                    Vício
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Saúde Física"
+                  >
+                    Saúde Física
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                    value="Saúde Intelectual"
+                  >
+                    Saúde Intelectual
                   </SelectItem>
                 </SelectContent>
               </Select>

@@ -89,8 +89,11 @@ export default function Perfil() {
 
           console.log("URL da IMAGEM : ", imageUrl);
 
+          console.log("Antes o radix Sort: ",userData.calendarios)
+
           const sortedCalendario = radixSort(userData.calendarios || []);
 
+          console.log("Apos o radix Sort: ", sortedCalendario)
           setUserData({
             user_firstName: userData.user_firstName || "",
             user_secondName: userData.user_secondName || "",

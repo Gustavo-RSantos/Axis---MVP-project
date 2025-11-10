@@ -24,7 +24,7 @@ export function Footer(){
                 >
                   <Mail className="w-5 h-5" />
                   <span className="group-hover:translate-x-1 transition-transform">
-                    contato@saudemasculina.com.br
+                    contato@axis.com.br
                   </span>
                 </a>
                 <a 
@@ -33,7 +33,7 @@ export function Footer(){
                 >
                   <Phone className="w-5 h-5" />
                   <span className="group-hover:translate-x-1 transition-transform">
-                    (17) 99999-9999
+                    (79) 99999-9999
                   </span>
                 </a>
               </div>
