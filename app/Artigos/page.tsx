@@ -265,6 +265,7 @@ export default function App() {
                   genderColors[article.gender] || "from-gray-500 to-gray-500"
                 }
                 index={index}
+                favButton={true}
               />
             ))}
           </div>

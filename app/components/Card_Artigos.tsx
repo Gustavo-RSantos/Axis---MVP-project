@@ -1,9 +1,10 @@
 import { motion } from "motion/react";
-import { ArrowRight, User, Tag } from "lucide-react";
+import { ArrowRight, User, Tag, Heart } from "lucide-react";
 import { Card } from "./ui/Card_Artigos_Rep";
-import Button from "./ui/Button"
+import Button from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { StaticImageData } from "next/image";
+import { useState } from "react";
 interface Article {
   id: number;
   title: string;
@@ -18,16 +19,39 @@ interface ArticleCardProps {
   article: Article;
   genderColor: string;
   index: number;
+  favButton: boolean
 }
 
-export function ArticleCard({ article, genderColor, index }: ArticleCardProps) {
+export function ArticleCard({ article, genderColor, index, favButton }: ArticleCardProps) {
   const handleGoToArticle = () => {
     console.log(`Navegando para artigo ${article.url}`);
-    window.open(article.url, '_blank');
+    window.open(article.url, "_blank");
   };
 
+  const [isFavorited, setIsFavorited] = useState(false); // Estado inicial: assumimos false (ou você pode passar como prop se souber)
+
+  async function handleToggleFavorite() {
+    try {
+      const res = await fetch(`/api/artigos/${article.id}/fav`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artigos_id: article.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsFavorited(data.favorited);
+        alert(data.favorited ? "Artigo favoritado!" : "Favorito removido!");
+      } else {
+        console.error("Erro:", data.message);
+        alert(`Erro: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Erro ao toggle favorito:", error);
+    }
+  }
+
   return (
-     <motion.div
+    <motion.div
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
@@ -35,14 +59,13 @@ export function ArticleCard({ article, genderColor, index }: ArticleCardProps) {
       <Card className="h-full bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] overflow-hidden group">
         {/* Decorative Top Bar */}
         <div className={`h-1 bg-linear-to-r ${genderColor}`} />
-        
+
         {/* Banner Image */}
-        <div 
+        <div
           className="relative h-48 overflow-hidden bg-slate-100 bg-cover bg-center"
-          style={{backgroundImage: `url(${article.image})`}}
-        >
-        </div>
-        
+          style={{ backgroundImage: `url(${article.image})` }}
+        ></div>
+
         <div className="p-6 flex flex-col">
           {/* Header */}
           <div className="mb-4">
@@ -74,7 +97,23 @@ export function ArticleCard({ article, genderColor, index }: ArticleCardProps) {
           </p>
 
           {/* Footer */}
-          <div className="flex items-center justify-end pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+            {/* Botão de Favoritar */}
+             {favButton && (
+              <Button
+                onClick={handleToggleFavorite}
+                className={`cursor-pointer py-2 px-4 transition-colors ${
+                  isFavorited
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                }`}
+              >
+                <Heart
+                  className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`}
+                />
+                {isFavorited ? "Favoritado" : "Favoritar"}
+              </Button>
+            )}
             <Button
               onClick={handleGoToArticle}
               className="bg-linear-to-r cursor-pointer from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md group py-2 px-4"

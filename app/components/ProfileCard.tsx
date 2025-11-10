@@ -7,7 +7,7 @@ import {
   Calendar,
   Camera,
 } from "lucide-react";
-import imageBase from "../../assets/iconePadrao.webp";
+import imageBase from "../assets/iconePadrao.webp";
 import Image from "next/image";
 
 import {
@@ -17,10 +17,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../components/ui/Dialog";
-import Label from "../../components/ui/Label";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+} from "./ui/Dialog";
+import Label from "./ui/Label";
+import Input from "./ui/Input";
+import Button from "./ui/Button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/app/lib/authClient";
@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogs,
   AlertDialogTitle,
-} from "./Alert_Dialog";
+} from "./ui/Alert_Dialog";
 
 interface ProfileCardProps {
   firstName: string;
@@ -77,6 +77,7 @@ export function ProfileCard({
   const [message, setMessage] = useState("");
 
   // Funções de manipulação da Tela de Alterar Dados do usuario
+  
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
 
@@ -95,7 +96,6 @@ export function ProfileCard({
 
   function handleCloseModal() {
     setShowProfileModal(false);
-    setEditedProfile(userProfile);
     setMessage("");
   }
 
@@ -112,7 +112,7 @@ export function ProfileCard({
       });
 
       const res = await response.json();
-      console.log("Resposta da API:", res); // Log para depuração
+      console.log("Resposta da API:", res);
 
       if (response.ok && res?.success) {
         setMessage("Perfil atualizado com sucesso!");
@@ -122,6 +122,7 @@ export function ProfileCard({
           user_secondname: res.user.user_secondname,
           user_age: res.user.user_age,
         });
+        
         window.location.reload();
         setShowProfileModal(false);
       } else {
@@ -285,6 +286,7 @@ export function ProfileCard({
         const fileInput = document.getElementById('user_image') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
+      window.location.reload();
       } else {
         setMessage(res.message || "Erro ao alterar imagem.");
       }
@@ -297,10 +299,9 @@ export function ProfileCard({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="md:flex">
-        {/* Profile Image */}
+        {/* Imagem do usuário */}
         <div className="md:w-64 md:shrink-0">
           <div className="relative w-64 h-64">
-            {/* Circular Image */}
             <div className="w-full h-full rounded-full overflow-hidden border-8 border-white">
               <Image
                 width={100}
@@ -311,7 +312,7 @@ export function ProfileCard({
               />
             </div>
 
-            {/* Camera Button */}
+            {/* Botão de editar imagem */}
             <Button
               onClick={handleOpenImageModal}
               className="absolute bottom-4 right-4 w-14 h-14 cursor-pointer rounded-full bg-white hover:bg-gray-100 shadow-lg flex items-center justify-center p-0"
@@ -320,12 +321,10 @@ export function ProfileCard({
               <Camera className="w-7 h-7 text-gray-800" />
             </Button>
 
-            {/* Hidden File Input */}
+            {/* Input para receber a imagem*/}
             <input
-              // ref={fileInputRef}
               type="file"
               accept="image/*"
-              // onChange={handleImageChange}
               className="hidden"
             />
           </div>

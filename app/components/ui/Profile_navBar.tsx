@@ -35,8 +35,6 @@ export default function UserProfile() {
                   const imageBlob = new Blob([byteArray], { type: "image/png" });
                   imageUrl = URL.createObjectURL(imageBlob);
               }
-
-              console.log("URL da IMAGEM : ", imageUrl)
   
                setUserProfile({
                 user_id: data.user_id,

@@ -5,16 +5,31 @@ import { useEffect, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 
 import Card_Exames from "../components/ui/Card_Exames";
-import { ProfileCard } from "../components/ui/ProfileCard";
-import testeArtigos from "../assets/banner-tester.png";
+import { ProfileCard } from "../components/ProfileCard";
 import Link from "next/link";
 import { radixSort } from "../script/radixSort";
 import { ArticleCard } from "../components/Card_Artigos";
+
+import bannerFitness from '../assets/imagens para o projeto/imagemArtigosFitness.png'
+import bannerNutricao from '../assets/imagens para o projeto/imagemArtigosNutrição.png'
+import bannerBemEstar from '../assets/imagens para o projeto/imagemArtigosBemStar.png'
+import bannerSaudeMental from '../assets/imagens para o projeto/imagemArtigosSaúdeMental.png'
+import bannerSono from '../assets/imagens para o projeto/imagemArtigosSono.png'
 
 interface Event {
   calendar_id: number;
   calendar_consulta: string;
   calendar_data: string;
+}
+
+interface Article {
+  id: number;
+  gender: string;
+  author: string;
+  title: string;
+  image: string;
+  description: string;
+  url: string;
 }
 
 export default function Perfil() {
@@ -27,6 +42,25 @@ export default function Perfil() {
     user_name: "",
     calendario: [] as Event[],
   });
+
+  const [favoriteArticles, setFavoriteArticles] = useState<Article[]>([]);
+  
+  function getDefaultImage(gender: string): string {
+    switch (gender.toLowerCase()) {
+      case 'fitness':
+        return bannerFitness.src;
+      case 'nutrição':
+        return bannerNutricao.src;
+      case 'bem-estar':
+        return bannerBemEstar.src;
+      case 'saúde mental':
+        return bannerSaudeMental.src;
+      case 'sono':
+        return bannerSono.src;
+      default:
+        return bannerFitness.src; // Imagem genérica para gêneros não previstos
+    }
+  }
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,7 +109,37 @@ export default function Perfil() {
         console.error("Erro na requisição:", error);
       }
     };
+
+    const fetchFavoriteArticles = async () => {
+      try {
+        const response = await fetch("/api/user/favorites", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) {
+// Corrige: mapeia data.articles (que é o array), não data
+          const formattedArticles: Article[] = data.articles.map((article: Article) => ({
+            id: article.id,
+            title: article.title,
+            author: article.author,
+            description: article.description,
+            gender: article.gender,
+            image: !article.image ? getDefaultImage(article.gender) : article.image,
+            url: article.url,
+          }));
+          console.log("Artigos formatados: ",formattedArticles)
+          setFavoriteArticles(formattedArticles);
+        } else {
+          console.error("Erro ao carregar favoritos:", data.message);
+        }
+      } catch (error) {
+        console.error("Erro na requisição de favoritos:", error);
+      }
+    };
+
     fetchUserData();
+    fetchFavoriteArticles();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -92,7 +156,7 @@ export default function Perfil() {
     const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   };
-
+  
   const genderColors: Record<string, string> = {
     Fitness: "from-orange-500 to-red-500",
     Nutrição: "from-green-500 to-emerald-500",
@@ -101,38 +165,38 @@ export default function Perfil() {
     Sono: "from-indigo-500 to-purple-500",
   };
 
-  const [articles] = useState([
-    {
-      id: 1,
-      title: "Como Manter uma Dieta Equilibrada no Dia a Dia",
-      description: "Só pra teste",
-      author: "Dr. Carlos Mendes",
-      gender: "Saúde Mental",
-      category: "Nutrição",
-      url:"teste",
-      image: testeArtigos.src,
-    },
-    {
-      id: 2,
-      title: "A Importância do Check-up Anual para sua Saúde",
-      description: "Só pra teste",
-      author: "Dra. Ana Paula Silva",
-      gender: "Saúde Mental",
-      category: "Prevenção",
-      url:"teste",
-      image: testeArtigos.src,
-    },
-    {
-      id: 3,
-      title: "Bem-estar Mental: Práticas para uma Vida Mais Saudável",
-      description: "Só pra teste",
-      author: "Dra. Juliana Santos",
-      gender: "Saúde Mental",
-      category: "Bem-estar",
-      url:"teste",
-      image: testeArtigos.src,
-    },
-  ]);
+  // const [articles] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Como Manter uma Dieta Equilibrada no Dia a Dia",
+  //     description: "Só pra teste",
+  //     author: "Dr. Carlos Mendes",
+  //     gender: "Saúde Mental",
+  //     category: "Nutrição",
+  //     url:"teste",
+  //     image: testeArtigos.src,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "A Importância do Check-up Anual para sua Saúde",
+  //     description: "Só pra teste",
+  //     author: "Dra. Ana Paula Silva",
+  //     gender: "Saúde Mental",
+  //     category: "Prevenção",
+  //     url:"teste",
+  //     image: testeArtigos.src,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Bem-estar Mental: Práticas para uma Vida Mais Saudável",
+  //     description: "Só pra teste",
+  //     author: "Dra. Juliana Santos",
+  //     gender: "Saúde Mental",
+  //     category: "Bem-estar",
+  //     url:"teste",
+  //     image: testeArtigos.src,
+  //   },
+  // ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -179,12 +243,13 @@ export default function Perfil() {
         <section className="mb-12">
           <h3 className="text-gray-900 mb-6">Artigos favoritos</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article, index) => (
+            {favoriteArticles.map((article, index) => (
               <ArticleCard
                 key={article.id}
                 article={article}
                 genderColor={genderColors[article.gender]}
                 index={index}
+                favButton={false}
               />
             ))}
           </div>

@@ -14,7 +14,6 @@ import {
   Users,
   Flame,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "../components/ui/Avatar";
 import Separator from "../components/ui/Separator";
 import { Badge } from "../components/ui/Badge";
 import Button from "../components/ui/Button";
@@ -47,25 +46,27 @@ interface Post {
 
 export default function App() {
   const [posts, setPosts] = useState<Post[]>([]);
-  // const [postGender, setPostGender] = useState("Geral"); 
+  // const [postGender, setPostGender] = useState("Geral");
   const [postImage, setPostImage] = useState<File | null>(null);
   const [mostrarComentarios, setMostrarComentarios] = useState<{
     [key: number]: boolean;
   }>({});
   const [loading, setLoading] = useState(true);
 
+  const [userImage, setUserImage] = useState<string>("");
+
   const postInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const postTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const comentarioRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
-  useEffect(() => { 
+  useEffect(() => {
     console.log("useEffect executado - buscando posts");
     const fetchPosts = async () => {
       try {
         const response = await fetch("/api/communityPosts");
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         if (data.success) {
           setPosts(data.posts);
           console.log(data.posts);
@@ -79,7 +80,30 @@ export default function App() {
     fetchPosts();
   }, []);
 
+  useEffect(() => {
+    async function fetchUserImage() {
+      try {
+        const response = await fetch("/api/userImage");
 
+        if (!response.ok) {
+          throw new Error(`Erro na API: ${response.status}`);
+        }
+
+        const userImageData = await response.json();
+
+        if (userImageData.success && userImageData.user_image) {
+          setUserImage(userImageData.user_image); // Agora é uma string (URL ou data URL)
+        } else {
+          console.error("Erro: Imagem não encontrada");
+          setUserImage(""); // Ou defina um placeholder
+        }
+      } catch (error) {
+        console.error("Erro ao buscar imagem do usuário:", error);
+        setUserImage(""); // Fallback
+      }
+    }
+    fetchUserImage();
+  }, []);
 
   async function handleCurtir(postId: number) {
     try {
@@ -108,17 +132,14 @@ export default function App() {
     }
   }
 
-    async function fetchComentarios(postId: number){
-      
+  async function fetchComentarios(postId: number) {
     try {
       const response = await fetch(`/api/communityPosts/${postId}/comments`);
       const data = await response.json();
       if (data.success) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
-            post.id === postId
-              ? { ...post, comentarios: data.comments } 
-              : post
+            post.id === postId ? { ...post, comentarios: data.comments } : post
           )
         );
       } else {
@@ -127,73 +148,81 @@ export default function App() {
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
     }
-  };
+  }
 
   async function handleAdicionarComentario(postId: number) {
+    //Caso o input venha vazio, ele não envia nada para o banco
+    const inputElement = comentarioRefs.current[postId];
+    const comentarioTexto = inputElement?.value.trim() || "";
 
-  //Caso o input venha vazio, ele não envia nada para o banco
-  const inputElement = comentarioRefs.current[postId];
-  const comentarioTexto = inputElement?.value.trim() || "";
+    if (!comentarioTexto) return;
 
-  if (!comentarioTexto) return;
+    try {
+      const response = await fetch(`/api/communityPosts/${postId}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: comentarioTexto }),
+      });
 
-  try {
-    const response = await fetch(`/api/communityPosts/${postId}/comment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: comentarioTexto }),
-    });
+      if (!response.ok) {
+        console.error(
+          "Erro na resposta:",
+          response.status,
+          response.statusText
+        );
+        alert(`Erro: ${response.status} - ${response.statusText}`);
+        return;
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Resposta não é JSON:", await response.text());
+        alert("Erro: Resposta inválida do servidor");
+        return;
+      }
 
-    if (!response.ok) {
-      console.error("Erro na resposta:", response.status, response.statusText);
-      alert(`Erro: ${response.status} - ${response.statusText}`);
-      return;
+      const data = await response.json();
+
+      if (data.success && data.comment) {
+        const userImage =
+          data.comment.user_image && data.comment.user_image !== ""
+            ? data.comment.user_image
+            : null;
+
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  comentarios: [
+                    ...post.comentarios,
+                    {
+                      id: data.comment.comentario_id,
+                      user_name: data.comment.user_name,
+                      user_image: userImage,
+                      comentario_text: comentarioTexto,
+                      comentario_data: new Date().toISOString(),
+                    },
+                  ],
+                }
+              : post
+          )
+        );
+
+        // Limpar o campo após enviar
+        if (inputElement) inputElement.value = "";
+
+        await fetchComentarios(postId);
+      } else {
+        alert(
+          "Erro ao adicionar comentário: " +
+            (data.message || "Resposta inválida")
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar comentário:", error);
+      alert("Erro ao adicionar comentário");
     }
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      console.error("Resposta não é JSON:", await response.text());
-      alert("Erro: Resposta inválida do servidor");
-      return;
-    }
-
-    const data = await response.json();
-    
-    if (data.success && data.comment) {
-      const userImage = data.comment.user_image && data.comment.user_image !== "" ? data.comment.user_image : null;
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                comentarios: [
-                  ...post.comentarios,
-                  {
-                    id: data.comment.comentario_id,
-                    user_name: data.comment.user_name,
-                    user_image: userImage,
-                    comentario_text: comentarioTexto,
-                    comentario_data: new Date().toISOString(),
-                  },
-                ],
-              }
-            : post
-        )
-      );
-
-      // Limpar o campo após enviar
-      if (inputElement) inputElement.value = "";
-
-      await fetchComentarios(postId);
-    } else {
-      alert("Erro ao adicionar comentário: " + (data.message || "Resposta inválida"));
-    }
-  } catch (error) {
-    console.error("Erro ao adicionar comentário:", error);
-    alert("Erro ao adicionar comentário");
   }
-}
-
 
   const toggleComentarios = (postId: number) => {
     setMostrarComentarios({
@@ -202,23 +231,22 @@ export default function App() {
     });
   };
 
-  const handleSubmitPost = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitPost = async (event: React.FormEvent) => {
+    event.preventDefault();
     // Captura o valor diretamente do textarea via ref (opcional, pois FormData já pega)
     const postText = postTextAreaRef.current?.value.trim();
     if (!postText) return;
-    const formData = new FormData(e.target as HTMLFormElement);
-    console.log("FormData contents:", [...formData.entries()]);  // Veja o que está sendo enviado
+    const formData = new FormData(event.target as HTMLFormElement);
+    console.log("FormData contents:", [...formData.entries()]); // Veja o que está sendo enviado
 
     try {
       const response = await fetch("/api/communityPosts", {
         method: "POST",
         body: formData,
       });
-      
+
       const data = await response.json();
       if (data.success) {
-
         if (postInputRef.current) postInputRef.current.value = "";
         if (postTextAreaRef.current) postTextAreaRef.current.value = "";
         window.location.reload();
@@ -272,14 +300,13 @@ export default function App() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-linear-to-tl from-blue-400/20 to-transparent rounded-full blur-3xl" />
       </div>
 
-      {/* Hero Section */}
+      {/* Banner */}
       <motion.section
         className="relative py-12 overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        {/* bg-linear-to-r from-teal-500/10 via-cyan-500/10 to-blue-500/10 */}
         <div className="absolute inset-0 bg-[url('./assets/bannerComunidade.jpg')]  bg-cover bg-no-repeat" />
         <div className="relative max-w-7xl mx-auto px-6">
           <motion.div
@@ -292,10 +319,10 @@ export default function App() {
               <CalendarCheck className="w-4 h-4 text-teal-600" />
               <span className="text-teal-700">+2.5k membros ativos hoje</span>
             </div>
-            <h1 className="text-slate-900 mb-4 max-w-3xl mx-auto">
+            <h1 className="text-slate-900 text-2xl mb-4 max-w-3xl mx-auto">
               Sua comunidade de saúde e bem-estar
             </h1>
-            <p className="text-slate-600 max-w-2xl mx-auto mb-6 leading-relaxed">
+            <p className="text-black max-w-2xl mx-auto mb-6 leading-relaxed">
               Conecte-se com pessoas que compartilham os mesmos objetivos.
               Compartilhe suas conquistas, aprenda com as experiências dos
               outros e cresça junto com a comunidade.
@@ -328,10 +355,10 @@ export default function App() {
         </div>
       </motion.section>
 
-      {/* Main Content */}
+      {/* Seção Principal */}
       <div className="relative max-w-7xl mx-auto px-6 pb-12 mt-4">
         <div className="grid lg:grid-cols-[280px_1fr_280px] md:grid-cols-[240px_1fr] gap-6">
-          {/* Left Sidebar */}
+          {/* Categorias */}
           <motion.aside
             className="hidden md:block space-y-4"
             initial={{ x: -40, opacity: 0 }}
@@ -400,12 +427,16 @@ export default function App() {
             >
               <Card className="p-5 bg-white/90 backdrop-blur-sm border-slate-200 shadow-lg">
                 <form onSubmit={handleSubmitPost}>
-                  <div className="flex content-center justify-center mb-2 gap-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback className="bg-linear-to-br from-teal-400 to-cyan-500 text-white">
-                        VC
-                      </AvatarFallback>
-                    </Avatar>
+                  <div className="flex content-center justify-center mb-4 gap-3">
+                    <div className="w-11 h-11">
+                      <Image
+                        width={100}
+                        height={100}
+                        src={userImage}
+                        alt="Post"
+                        className="w-full h-full rounded-full object-cover hover:scale-105 transition-transform duration-50"
+                      />
+                    </div>
                     <InputRef
                       id="post_name"
                       type="text"
@@ -413,7 +444,7 @@ export default function App() {
                       ref={postInputRef}
                       placeholder="Digite o titulo da postagem"
                       maxLength={50}
-                      className="w-full border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
+                      className="w-[90%] h-11 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
                     />
                   </div>
                   <div>
@@ -422,32 +453,32 @@ export default function App() {
                       id="post_text"
                       placeholder="Compartilhe sua jornada de saúde..."
                       ref={postTextAreaRef}
-                      className="min-h-20 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
+                      className="min-h-40 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50 resize max-md:min-h-50"
                     />
                   </div>
                   <div className="flex justify-between items-center mt-4">
                     <Button
                       type="button"
                       onClick={handleImageButtonClick}
-                      className="text-slate-600 hover:text-teal-600 py-4 px-2"
+                      className="text-slate-600 hover:text-teal-600 py-4 px-2 max-md:text-lg"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       {postImage
                         ? `Imagem selecionada: ${postImage.name}`
                         : "Adicionar imagem"}
                     </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        name="post_image"
-                        accept="image/*" // Apenas imagens
-                        onChange={handleImageChange}
-                        style={{ display: "none" }} // Oculto
-                      />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      name="post_image"
+                      accept="image/*" // Apenas imagens
+                      onChange={handleImageChange}
+                      style={{ display: "none" }} // Oculto
+                    />
 
                     <Button
                       type="submit"
-                      className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md  py-2 px-4"
+                      className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md  py-2 px-4 max-md:text-lg"
                     >
                       Publicar
                     </Button>
@@ -469,12 +500,12 @@ export default function App() {
                   <div className="p-5">
                     <div className="flex items-start gap-3 mb-4">
                       <div className="w-11 h-11">
-                        <Image 
+                        <Image
                           width={100}
                           height={100}
                           src={post.user_image}
                           alt="Post"
-                          className="w-full rounded-full h-full object-cover hover:scale-105 transition-transform duration-50"                     
+                          className="w-full rounded-full h-full object-cover hover:scale-105 transition-transform duration-50"
                         />
                       </div>
                       <div className="flex-1">
@@ -494,11 +525,9 @@ export default function App() {
                     </div>
 
                     {post.name && (
-                      // <div className="border-b border-gray-300 mb-3">
-                        <h1 className="text-slate-700  text-[20px] leading-relaxed mb-0">
-                          {post.name}
-                        </h1>
-                      // </div>
+                      <h1 className="text-slate-700  text-[20px] leading-relaxed mb-0">
+                        {post.name}
+                      </h1>
                     )}
 
                     <p className="text-slate-700 leading-relaxed mb-4">
@@ -565,14 +594,14 @@ export default function App() {
                         <div className="space-y-3">
                           {post.comentarios.map((comentario) => (
                             <div key={comentario.id} className="flex gap-3">
-                               <div className="relative rounded-full w-12 h-12 overflow-hidden bg-slate-100">
-                                  <Image
-                                    width={100}
-                                    height={100}
-                                    src={comentario.user_image}
-                                    alt="Foto do usuario do comentario"
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                                  />
+                              <div className="relative rounded-full w-12 h-12 overflow-hidden bg-slate-100">
+                                <Image
+                                  width={100}
+                                  height={100}
+                                  src={comentario.user_image}
+                                  alt="Foto do usuario do comentario"
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                />
                               </div>
                               <div className="flex-1 bg-linear-to-br from-slate-50 to-slate-100/50 rounded-xl p-3">
                                 <div className="flex items-center gap-2 mb-1">
@@ -592,11 +621,15 @@ export default function App() {
 
                           {/* Novo Comentário */}
                           <div className="flex gap-3 pt-2">
-                            <Avatar className="w-8 h-8">
-                              <AvatarFallback className="bg-linear-to-br from-teal-400 to-cyan-500 text-white">
-                                VC
-                              </AvatarFallback>
-                            </Avatar>
+                            <div className="w-11 h-11">
+                              <Image
+                                width={100}
+                                height={100}
+                                src={userImage}
+                                alt="Post"
+                                className="w-full h-full rounded-full object-cover hover:scale-105 transition-transform duration-50"
+                              />
+                            </div>
                             <div className="flex-1 flex gap-2">
                               <InputRef
                                 type="text"
@@ -604,13 +637,13 @@ export default function App() {
                                 ref={(element: HTMLInputElement | null) => {
                                   comentarioRefs.current[post.id] = element;
                                 }}
-                                className="border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-white"
+                                className="border-slate-200 h-11 focus:border-teal-500 focus:ring-teal-500 bg-white max-md:h-12"
                               />
                               <Button
                                 onClick={() =>
                                   handleAdicionarComentario(post.id)
                                 }
-                                className="bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md py-2 px-4"
+                                className="bg-linear-to-r from-teal-600  to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md px-4 max-md:text-lg"
                               >
                                 Enviar
                               </Button>
@@ -624,14 +657,6 @@ export default function App() {
               </motion.div>
             ))}
           </div>
-
-          {/* Right Sidebar - Hidden on smaller screens, visible on large */}
-          <motion.aside
-            className="hidden lg:block space-y-4"
-            initial={{ x: 40, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          ></motion.aside>
         </div>
       </div>
     </div>
