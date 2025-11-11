@@ -20,7 +20,22 @@ export async function GET() {
       }  
     });    
 
-    return NextResponse.json({ success: true, artigos });
+    // Se o usuário estiver logado, verifica favoritos
+    let favoritedIds: number[] = [];
+    if (payload.user_id) {
+      const favorites = await prisma.artigos_favoritos.findMany({
+        where: { user_id: payload.user_id },
+        select: { artigos_id: true },
+      });
+      favoritedIds = favorites.map((fav) => fav.artigos_id);
+    }
+    // Mapeia os artigos com o status de favorito
+    const artigosComFavorito = artigos.map((artigo) => ({
+      ...artigo,
+      isFavorited: favoritedIds.includes(artigo.artigos_id), // Campo booleano
+    }));
+
+    return NextResponse.json({ success: true, artigos: artigosComFavorito });
     
   } catch (error) {
     console.error("Erro ao buscar posts:", error);

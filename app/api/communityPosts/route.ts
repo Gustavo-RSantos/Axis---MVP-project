@@ -14,28 +14,28 @@ export interface PostDataProps {
 export async function GET() {
   console.log("API GET chamada");
   try {
-    const payload = await getUserFromCookie(); // Para verificar likes do usuário atual
+    const payload = await getUserFromCookie(); 
 
     const posts = await prisma.postagens.findMany({
       include: {
         cadastros: {
           include: {
-            perfis: true, // Inclui perfis para user_name e user_image
+            perfis: true, 
           },
         },
         postagem_comentarios: {
           include: {
             cadastros: {
               include: {
-                perfis: true, // Inclui perfis para autor e avatar dos comentários
+                perfis: true, 
               },
             },
           },
-          orderBy: { comentario_data: 'asc' }, // Ordena comentários por data
+          orderBy: { comentario_data: 'asc' }, 
         },
-        postagem_likes: true, // Inclui likes para contar e verificar se o usuário atual deu like
+        postagem_likes: true, 
       },
-      orderBy: { post_data: 'desc' }, // Ordena posts por data decrescente
+      orderBy: { post_data: 'desc' }, 
     });
 
     // Mapear para o formato esperado pelo frontend

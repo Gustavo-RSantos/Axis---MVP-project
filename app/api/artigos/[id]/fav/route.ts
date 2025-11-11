@@ -17,17 +17,17 @@ export async function POST(
     }
 
     const { id } = await params;
-    const artigoId = parseInt(id, 10);
-    if (isNaN(artigoId) || artigoId <= 0) {
+    const artigo_id = parseInt(id, 10);
+    if (isNaN(artigo_id) || artigo_id <= 0) {
       return NextResponse.json(
         { success: false, message: "ID do artigo inválido" },
         { status: 400 }
       );
     }
 
-    // Verifica se o artigo existe (opcional, mas recomendado)
+    // Verifica se o artigo existe
     const artigoExists = await prisma.artigos.findUnique({
-      where: { artigos_id: artigoId }, // Ajuste o nome da tabela/coluna se necessário
+      where: { artigos_id: artigo_id },
     });
     if (!artigoExists) {
       return NextResponse.json(
@@ -36,30 +36,32 @@ export async function POST(
       );
     }
 
+    // Busca o favorito existente (único por user_id + artigos_id)
     const existingFavorite = await prisma.artigos_favoritos.findFirst({
       where: {
-        artigos_id: artigoId,
+        artigos_id: artigo_id,
         user_id: payload.user_id,
       },
     });
 
     if (existingFavorite) {
-      // Remove o favorito (usa where com user_id e artigos_id)
-      await prisma.artigos_favoritos.deleteMany({
+      //Deleta o favorito caso o usuario desmarque
+      await prisma.artigos_favoritos.delete({
         where: {
-          user_id: payload.user_id,
-          artigos_id: artigoId,
+          artigos_fav_id: existingFavorite.artigos_fav_id,
         },
       });
+      console.log(`Favorito removido: user_id=${payload.user_id}, artigos_id=${artigo_id}`);
       return NextResponse.json({ success: true, favorited: false });
     } else {
-      // Adiciona o favorito
+      // Adiciona o favorito 
       await prisma.artigos_favoritos.create({
         data: {
-          artigos_id: artigoId,
+          artigos_id: artigo_id,
           user_id: payload.user_id,
         },
       });
+      console.log(`Favorito adicionado: user_id=${payload.user_id}, artigos_id=${artigo_id}`);
       return NextResponse.json({ success: true, favorited: true });
     }
   } catch (error) {

@@ -32,6 +32,7 @@ interface ApiArticle {
   artigos_image: string | null;
   artigos_description: string;
   artigos_url: string;
+  isFavorited: boolean;
 }
 interface Article {
   id: number;
@@ -42,6 +43,7 @@ interface Article {
   date: string;
   image: string;
   url: string;
+  isFavorited: boolean; // Novo campo
 }
 
 const genderColors: Record<string, string> = {
@@ -109,18 +111,18 @@ export default function App() {
         if (data.success) {
           // Mapeie os dados da API para o formato esperado
           const mappedArticles: Article[] = data.artigos.map(
-            (apiArticle: ApiArticle) => ({
-              id: apiArticle.artigos_id,
-              title: apiArticle.artigos_titulo,
-              author: apiArticle.artigos_autor,
-              description: apiArticle.artigos_description,
-              gender: apiArticle.artigos_gender,
+            (artigo: ApiArticle) => ({
+              id: artigo.artigos_id,
+              title: artigo.artigos_titulo,
+              author: artigo.artigos_autor,
+              description: artigo.artigos_description,
+              gender: artigo.artigos_gender,
+              image: artigo.artigos_image === undefined
+              ? getDefaultImage(artigo.artigos_gender)
+              : artigo.artigos_image,
               date: new Date().toISOString().split("T")[0],
-              image:
-                apiArticle.artigos_image === undefined
-                  ? getDefaultImage(apiArticle.artigos_gender)
-                  : apiArticle.artigos_image,
-              url: apiArticle.artigos_url,
+              url: artigo.artigos_url,
+              isFavorited: artigo.isFavorited || false, // Use o campo da API
             })
           );
           console.log(mappedArticles);

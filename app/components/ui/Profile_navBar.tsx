@@ -63,9 +63,9 @@ export default function UserProfile() {
   const router = useRouter();
 
     const handleLogout = async () => {
-        await logoutUser();
-        
-      //  setTimeout(() => {
+      
+      await logoutUser();
+      // setTimeout(() => {
       //     alert('Logout realizado! Redirecionando...');  // Ou use uma biblioteca de toast
       //     router.replace('/');
       //   }, 2000);

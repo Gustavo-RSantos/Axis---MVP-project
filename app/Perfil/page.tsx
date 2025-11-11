@@ -10,12 +10,17 @@ import Link from "next/link";
 import { radixSort } from "../script/radixSort";
 import { ArticleCard } from "../components/Card_Artigos";
 
-import bannerFitness from '../assets/imagens para o projeto/imagemArtigosFitness.png'
-import bannerNutricao from '../assets/imagens para o projeto/imagemArtigosNutrição.png'
-import bannerBemEstar from '../assets/imagens para o projeto/imagemArtigosBemStar.png'
-import bannerSaudeMental from '../assets/imagens para o projeto/imagemArtigosSaúdeMental.png'
-import bannerSono from '../assets/imagens para o projeto/imagemArtigosSono.png'
-
+import bannerFitness from "../assets/imagensArtigos/imagemArtigosFitness.png";
+import bannerNutricao from "../assets/imagensArtigos/imagemArtigosNutrição.png";
+import bannerBemEstar from "../assets/imagensArtigos/imagemArtigosBemStar.png";
+import bannerSaudeMental from "../assets/imagensArtigos/imagemArtigosSaúdeMental.png";
+import bannerSono from "../assets/imagensArtigos/imagemArtigosSono.png";
+import bannerEnvelhecimento from "../assets/imagensArtigos/bannerEnvelhecimento.jpg";
+import bannerSaudeFisica from "../assets/imagensArtigos/bannerSaudeFisica.jpg";
+import bannerSaudeIntelectual from "../assets/imagensArtigos/bannerSaudeIntelectual.jpg";
+import bannerSaudePreventiva from "../assets/imagensArtigos/bannerSaudePreventiva.jpg";
+import bannerSaudePublica from "../assets/imagensArtigos/bannerSaudePublica.jpg";
+import bannerVicio from "../assets/imagensArtigos/bannerVicio.jpg";
 interface Event {
   calendar_id: number;
   calendar_consulta: string;
@@ -47,16 +52,28 @@ export default function Perfil() {
   
   function getDefaultImage(gender: string): string {
     switch (gender.toLowerCase()) {
-      case 'fitness':
+      case "fitness":
         return bannerFitness.src;
-      case 'nutrição':
+      case "nutrição":
         return bannerNutricao.src;
-      case 'bem-estar':
+      case "bem-estar":
         return bannerBemEstar.src;
-      case 'saúde mental':
+      case "saúde mental":
         return bannerSaudeMental.src;
-      case 'sono':
+      case "sono":
         return bannerSono.src;
+      case "envelhecimento":
+        return bannerEnvelhecimento.src;
+      case "saúde física":
+        return bannerSaudeFisica.src;
+      case "saúde intelectual":
+        return bannerSaudeIntelectual.src;
+      case "saúde preventiva":
+        return bannerSaudePreventiva.src;
+      case "saúde pública":
+        return bannerSaudePublica.src;
+      case "vício":
+        return bannerVicio.src;
       default:
         return bannerFitness.src; // Imagem genérica para gêneros não previstos
     }

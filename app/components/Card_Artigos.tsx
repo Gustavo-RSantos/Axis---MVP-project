@@ -13,6 +13,7 @@ interface Article {
   image: string | StaticImageData;
   gender: string;
   url: string;
+  isFavorited: boolean;
 }
 
 interface ArticleCardProps {
@@ -28,7 +29,7 @@ export function ArticleCard({ article, genderColor, index, favButton }: ArticleC
     window.open(article.url, "_blank");
   };
 
-  const [isFavorited, setIsFavorited] = useState(false); // Estado inicial: assumimos false (ou você pode passar como prop se souber)
+  const [isFavorited, setIsFavorited] = useState(article.isFavorited);
 
   async function handleToggleFavorite() {
     try {

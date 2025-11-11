@@ -22,8 +22,8 @@ function mostDigits(arr: number[]): number {
 }
 
 export function radixSort(dates: Event[]): Event[] {
-    const now: number = new Date().getTime();
-    const futureEvents: Event[] = dates.filter(event => new Date(event.calendar_data).getTime() >= now);
+    const dateToday: number = new Date().getTime();
+    const futureEvents: Event[] = dates.filter(event => new Date(event.calendar_data).getTime() >= dateToday);
     if (futureEvents.length === 0) return [];
 
     let items = futureEvents.map(event => ({
