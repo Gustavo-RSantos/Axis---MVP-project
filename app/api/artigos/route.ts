@@ -27,7 +27,7 @@ export async function GET() {
         where: { user_id: payload.user_id },
         select: { artigos_id: true },
       });
-      favoritedIds = favorites.map((fav) => fav.artigos_id);
+      favoritedIds = favorites.map((fav) => fav.artigos_id).filter((id): id is number => id !== null);  // Filtra nulls
     }
     // Mapeia os artigos com o status de favorito
     const artigosComFavorito = artigos.map((artigo) => ({
