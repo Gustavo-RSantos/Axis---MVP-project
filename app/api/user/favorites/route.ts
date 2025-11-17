@@ -26,21 +26,11 @@ export async function GET() {
       const artigo = fav.artigos;
       if (!artigo) return null; // Pula se artigo não existir
 
-      let imageUrl: string | null = null;
-
-      // Converte imagem (Bytes) para Blob URL, como no seu código de perfil
-      if (artigo.artigos_image && Array.isArray(artigo.artigos_image) && artigo.artigos_image.length > 0) {
-        const byteArray = new Uint8Array(artigo.artigos_image);
-        const imageBlob = new Blob([byteArray], { type: "image/png" });
-        imageUrl = URL.createObjectURL(imageBlob);
-      }
-
       return {
         id: artigo.artigos_id,
         title: artigo.artigos_titulo || "Título não disponível",
         author: artigo.artigos_autor || "Autor não disponível",
         description: artigo.artigos_description || "Descrição não disponível",
-        image: imageUrl || null, // Fallback para imagem padrão
         gender: artigo.artigos_gender || "Gênero não disponível",
         url: artigo.artigos_url || "#",
       };
