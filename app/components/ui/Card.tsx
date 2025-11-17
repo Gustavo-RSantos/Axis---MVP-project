@@ -91,6 +91,7 @@ export default function Card({
         return colors.blue;
     }
   }
+  
   const imageSrc = typeof image === "string" ? image : image.src;
   const ImageBlock = (
     <motion.div
