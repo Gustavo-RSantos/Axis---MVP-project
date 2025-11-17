@@ -2,21 +2,32 @@ import prisma from "@/app/lib/prisma";
 import { getUserFromCookie } from "@/app/lib/auth";
 import { NextResponse, NextRequest } from "next/server";
 
-export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const payload = await getUserFromCookie();
-    if (!payload) return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
+    if (!payload)
+      return NextResponse.json(
+        { success: false, message: "Não autenticado" },
+        { status: 401 }
+      );
 
     const { content } = await request.json();
-    if (!content) return NextResponse.json({ success: false, message: "Conteúdo obrigatório" }, { status: 400 });
+    if (!content)
+      return NextResponse.json(
+        { success: false, message: "Conteúdo obrigatório" },
+        { status: 400 }
+      );
 
-    const { id } = await context.params;;
-    const postId = parseInt(id, 10); 
+    const { id } = await context.params;
+    const postId = parseInt(id, 10);
     if (isNaN(postId) || postId <= 0) {
-    return NextResponse.json(
+      return NextResponse.json(
         { success: false, message: "ID do post inválido" },
         { status: 400 }
-    );
+      );
     }
 
     const newComment = await prisma.postagem_comentarios.create({
@@ -39,29 +50,35 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         },
       },
     });
-     let userImage = null;
+    let userImage = null;
 
-      if (newComment.cadastros?.perfis?.user_image) {
-        const buffer = Buffer.from(newComment.cadastros.perfis.user_image);
-        userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`;
-      }
+    if (newComment.cadastros?.perfis?.user_image) {
+      const buffer = Buffer.from(newComment.cadastros.perfis.user_image);
+      userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+    }
 
-      const formattedComment = {
-        comentario_id: newComment.comentario_id,
-        user_name: newComment.cadastros?.perfis?.user_name || "Usuário Anônimo",
-        user_image: userImage, // Já tratado como null se não existir
-        comentario_text: newComment.comentario_text,
-        comentario_data: newComment.comentario_data?.toISOString(),
-      };
+    const formattedComment = {
+      comentario_id: newComment.comentario_id,
+      user_name: newComment.cadastros?.perfis?.user_name || "Usuário Anônimo",
+      user_image: userImage, // Já tratado como null se não existir
+      comentario_text: newComment.comentario_text,
+      comentario_data: newComment.comentario_data?.toISOString(),
+    };
 
     return NextResponse.json({ success: true, comment: formattedComment });
   } catch (error) {
     console.error("Erro ao adicionar comentário:", error);
-    return NextResponse.json({ success: false, message: "Erro ao adicionar comentário" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Erro ao adicionar comentário" },
+      { status: 500 }
+    );
   }
 }
 
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string; }> })  {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await context.params;
 
@@ -105,13 +122,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         user_name: comment.cadastros?.perfis?.user_name || "Usuário Anônimo", // Fallback se não houver perfil
         user_image: userImage || null, // Fallback para imagem padrão se não houver
         comentario_text: comment.comentario_text || "",
-        comentario_data: comment.comentario_data?.toISOString() || new Date().toISOString(),
+        comentario_data:
+          comment.comentario_data?.toISOString() || new Date().toISOString(),
       };
     });
 
     return NextResponse.json({ success: true, comments: formattedComments });
   } catch (error) {
     console.error("Erro ao buscar comentários:", error);
-    return NextResponse.json({ success: false, message: "Erro ao buscar comentários" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Erro ao buscar comentários" },
+      { status: 500 }
+    );
   }
 }

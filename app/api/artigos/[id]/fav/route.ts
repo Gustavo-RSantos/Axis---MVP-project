@@ -1,11 +1,11 @@
 // app/api/artigos/[id]/fav/route.ts
 import { getUserFromCookie } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getUserFromCookie();
@@ -16,7 +16,7 @@ export async function POST(
       );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
     const artigo_id = parseInt(id, 10);
     if (isNaN(artigo_id) || artigo_id <= 0) {
       return NextResponse.json(

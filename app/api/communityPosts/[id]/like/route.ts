@@ -1,10 +1,10 @@
 import { getUserFromCookie } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+   request: NextRequest,
+   context: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getUserFromCookie();
@@ -15,15 +15,14 @@ export async function POST(
       );
     }
 
-    console.log(params.id);
     
-    const { id } = await params;
-    const postId = parseInt(id, 10); 
+    const { id } = await context.params;
+    const postId = parseInt(id, 10);
     if (isNaN(postId) || postId <= 0) {
-    return NextResponse.json(
+      return NextResponse.json(
         { success: false, message: "ID do post inválido" },
         { status: 400 }
-    );
+      );
     }
 
     // Verifica se o post existe (opcional, mas recomendado)

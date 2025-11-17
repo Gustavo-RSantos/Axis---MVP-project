@@ -36,6 +36,7 @@ interface Article {
   image: string;
   description: string;
   url: string;
+  isFavorited: boolean;
 }
 
 export default function Perfil() {
@@ -151,6 +152,7 @@ export default function Perfil() {
                 ? getDefaultImage(article.gender)
                 : article.image,
               url: article.url,
+              isFavorited: article.isFavorited,
             })
           );
           console.log("Artigos formatados: ", formattedArticles);
