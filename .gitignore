@@ -24,7 +24,7 @@
 .DS_Store
 *.pem
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # debug
@@ -39,5 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-/app/generated/prisma
