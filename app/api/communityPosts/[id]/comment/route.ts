@@ -1,8 +1,8 @@
 import prisma from "@/app/lib/prisma";
 import { getUserFromCookie } from "@/app/lib/auth";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const payload = await getUserFromCookie();
     if (!payload) return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
@@ -10,7 +10,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const { content } = await request.json();
     if (!content) return NextResponse.json({ success: false, message: "Conteúdo obrigatório" }, { status: 400 });
 
-    const { id } = await params;
+    const { id } = await context.params;;
     const postId = parseInt(id, 10); 
     if (isNaN(postId) || postId <= 0) {
     return NextResponse.json(
@@ -61,9 +61,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string; }> })  {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
+
     const postId = parseInt(id, 10);
     if (isNaN(postId) || postId <= 0) {
       return NextResponse.json(
@@ -92,7 +93,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     // Formata os comentários para o frontend
     const formattedComments = comments.map((comment) => {
-      // Converte user_image (blob) para base64 se existir
+      // Converte imagem de blob para base64
       let userImage = null;
       if (comment.cadastros?.perfis?.user_image) {
         const buffer = Buffer.from(comment.cadastros.perfis.user_image);

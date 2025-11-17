@@ -21,6 +21,7 @@ import bannerSaudeIntelectual from "../assets/imagensArtigos/bannerSaudeIntelect
 import bannerSaudePreventiva from "../assets/imagensArtigos/bannerSaudePreventiva.jpg";
 import bannerSaudePublica from "../assets/imagensArtigos/bannerSaudePublica.jpg";
 import bannerVicio from "../assets/imagensArtigos/bannerVicio.jpg";
+
 interface Event {
   calendar_id: number;
   calendar_consulta: string;
@@ -49,7 +50,7 @@ export default function Perfil() {
   });
 
   const [favoriteArticles, setFavoriteArticles] = useState<Article[]>([]);
-  
+
   function getDefaultImage(gender: string): string {
     switch (gender.toLowerCase()) {
       case "fitness":
@@ -106,11 +107,11 @@ export default function Perfil() {
 
           console.log("URL da IMAGEM : ", imageUrl);
 
-          console.log("Antes o radix Sort: ",userData.calendarios)
+          console.log("Antes o radix Sort: ", userData.calendarios);
 
           const sortedCalendario = radixSort(userData.calendarios || []);
 
-          console.log("Apos o radix Sort: ", sortedCalendario)
+          console.log("Apos o radix Sort: ", sortedCalendario);
           setUserData({
             user_firstName: userData.user_firstName || "",
             user_secondName: userData.user_secondName || "",
@@ -138,17 +139,21 @@ export default function Perfil() {
         });
         const data = await response.json();
         if (data.success) {
-// Corrige: mapeia data.articles (que é o array), não data
-          const formattedArticles: Article[] = data.articles.map((article: Article) => ({
-            id: article.id,
-            title: article.title,
-            author: article.author,
-            description: article.description,
-            gender: article.gender,
-            image: !article.image ? getDefaultImage(article.gender) : article.image,
-            url: article.url,
-          }));
-          console.log("Artigos formatados: ",formattedArticles)
+          // Corrige: mapeia data.articles (que é o array), não data
+          const formattedArticles: Article[] = data.articles.map(
+            (article: Article) => ({
+              id: article.id,
+              title: article.title,
+              author: article.author,
+              description: article.description,
+              gender: article.gender,
+              image: !article.image
+                ? getDefaultImage(article.gender)
+                : article.image,
+              url: article.url,
+            })
+          );
+          console.log("Artigos formatados: ", formattedArticles);
           setFavoriteArticles(formattedArticles);
         } else {
           console.error("Erro ao carregar favoritos:", data.message);
@@ -176,47 +181,20 @@ export default function Perfil() {
     const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   };
-  
+
   const genderColors: Record<string, string> = {
     Fitness: "from-orange-500 to-red-500",
     Nutrição: "from-green-500 to-emerald-500",
     "Bem-estar": "from-purple-500 to-pink-500",
     "Saúde Mental": "from-blue-500 to-cyan-500",
     Sono: "from-indigo-500 to-purple-500",
+    Envelhecimento: "from-amber-500 to-yellow-600",
+    "Saúde Preventiva": "from-teal-500 to-emerald-500",
+    "Saúde Pública": "from-blue-600 to-sky-400",
+    Vício: "from-rose-600 to-red-500",
+    "Saúde Física": "from-red-500 to-amber-500",
+    "Saúde Intelectual": "from-violet-500 to-fuchsia-500",
   };
-
-  // const [articles] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Como Manter uma Dieta Equilibrada no Dia a Dia",
-  //     description: "Só pra teste",
-  //     author: "Dr. Carlos Mendes",
-  //     gender: "Saúde Mental",
-  //     category: "Nutrição",
-  //     url:"teste",
-  //     image: testeArtigos.src,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "A Importância do Check-up Anual para sua Saúde",
-  //     description: "Só pra teste",
-  //     author: "Dra. Ana Paula Silva",
-  //     gender: "Saúde Mental",
-  //     category: "Prevenção",
-  //     url:"teste",
-  //     image: testeArtigos.src,
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Bem-estar Mental: Práticas para uma Vida Mais Saudável",
-  //     description: "Só pra teste",
-  //     author: "Dra. Juliana Santos",
-  //     gender: "Saúde Mental",
-  //     category: "Bem-estar",
-  //     url:"teste",
-  //     image: testeArtigos.src,
-  //   },
-  // ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
