@@ -1,0 +1,104 @@
+generator client {
+  provider      = "prisma-client-js" // Nota: Use "prisma-client-js", não "prisma-client" (que é obsoleto)
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  output        = "./generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cadastros {
+  user_id              Int                    @id @default(autoincrement())
+  user_age             Int?                   @db.TinyInt
+  user_mail            String?                @unique(map: "user_mail_UNIQUE") @db.VarChar(50)
+  user_firstname       String?                @db.VarChar(30)
+  user_secondname      String?                @db.VarChar(30)
+  user_phone           String?                @db.VarChar(15)
+  user_password_hash   String?                @db.VarChar(100)
+  artigos_favoritos    artigos_favoritos[]
+  calendarios          calendarios[]
+  perfis               perfis?
+  postagem_comentarios postagem_comentarios[]
+  postagem_likes       postagem_likes[]
+  postagens            postagens[]
+}
+
+model calendarios {
+  calendar_id       Int        @id @default(autoincrement())
+  user_id           Int?
+  calendar_data     DateTime?  @db.DateTime(0)
+  calendar_consulta String?    @db.Text
+  cadastros         cadastros? @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "calendarios_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model perfis {
+  user_id    Int       @id
+  user_name  String?   @db.VarChar(30)
+  user_image Bytes?    @db.MediumBlob
+  cadastros  cadastros @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "perfis_ibfk_1")
+}
+
+model postagem_comentarios {
+  comentario_id   Int        @id @default(autoincrement())
+  post_id         Int?
+  user_id         Int?
+  comentario_text String?    @db.Text
+  comentario_data DateTime?  @db.DateTime(0)
+  postagens       postagens? @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "postagem_comentarios_ibfk_1")
+  cadastros       cadastros? @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "postagem_comentarios_ibfk_2")
+
+  @@index([post_id], map: "post_id")
+  @@index([user_id], map: "user_id")
+}
+
+model postagens {
+  post_id              Int                    @id @default(autoincrement())
+  user_id              Int?
+  post_name            String?                @db.VarChar(50)
+  post_text            String?                @db.Text
+  post_data            DateTime?              @db.DateTime(0)
+  post_image           Bytes?                 @db.MediumBlob
+  post_gender          String?                @db.VarChar(30)
+  postagem_comentarios postagem_comentarios[]
+  postagem_likes       postagem_likes[]
+  cadastros            cadastros?             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "postagens_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model postagem_likes {
+  id_like   Int        @id @default(autoincrement())
+  post_id   Int?
+  user_id   Int?
+  data_like DateTime?  @db.DateTime(0)
+  postagens postagens? @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "postagem_likes_ibfk_1")
+  cadastros cadastros? @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "postagem_likes_ibfk_2")
+
+  @@index([post_id], map: "post_id")
+  @@index([user_id], map: "user_id")
+}
+
+model artigos {
+  artigos_id          Int                 @id @default(autoincrement())
+  artigos_gender      String?             @db.VarChar(45)
+  artigos_titulo      String?             @db.Text
+  artigos_description String?             @db.Text
+  artigos_url         String?             @db.Text
+  artigos_autor       String?             @db.VarChar(45)
+  artigos_favoritos   artigos_favoritos[]
+}
+
+model artigos_favoritos {
+  artigos_fav_id Int        @id @default(autoincrement())
+  user_id        Int?
+  artigos_id     Int?
+  cadastros      cadastros? @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "artigos_favoritos_ibfk_1")
+  artigos        artigos?   @relation(fields: [artigos_id], references: [artigos_id], onDelete: NoAction, onUpdate: NoAction, map: "artigos_favoritos_ibfk_2")
+
+  @@index([artigos_id], map: "artigos_id")
+  @@index([user_id], map: "user_id")
+}
