@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::406891296544:oidc-provider/oidc.vercel.com/gustavo-santos-projects-07e8e91f"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.vercel.com/gustavo-santos-projects-07e8e91f:sub": "owner:gustavo-santos-projects-07e8e91f:project:axismvp:environment:production",
+          "oidc.vercel.com/gustavo-santos-projects-07e8e91f:aud": "https://vercel.com/gustavo-santos-projects-07e8e91f"
+        }
+      }
+    }
+  ]
+}
