@@ -36,7 +36,7 @@ export async function POST(
       );
     }
 
-    // Busca o favorito existente (único por user_id + artigos_id)
+    // Busca o favorito existente
     const existingFavorite = await prisma.artigos_favoritos.findFirst({
       where: {
         artigos_id: artigo_id,
@@ -46,6 +46,9 @@ export async function POST(
 
     if (existingFavorite) {
       //Deleta o favorito caso o usuario desmarque
+      
+      // DELETE FROM artigos_favoritos
+      // WHERE artigos_fav_id = {ID_DO_FAVORITO};
       await prisma.artigos_favoritos.delete({
         where: {
           artigos_fav_id: existingFavorite.artigos_fav_id,

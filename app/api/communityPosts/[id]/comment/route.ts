@@ -29,6 +29,18 @@ export async function POST(
         { status: 400 }
       );
     }
+    // INSERT INTO postagem_comentarios (
+    //   post_id,
+    //   user_id,
+    //   comentario_text,
+    //   comentario_data
+    // )
+    // VALUES (
+    //   {post_id},
+    //   {user-id},
+    //   {comentario_text},
+    //   {new Date()}
+    // );
 
     const newComment = await prisma.postagem_comentarios.create({
       data: {
@@ -91,6 +103,14 @@ export async function GET(
     }
 
     // Busca os comentários do post, incluindo dados do usuário via cadastros e perfis
+    // SELECT p.*, c.*, pf.*, pc.*, cc.*, cpf.*, pl.* FROM postagens AS p
+    // JOIN cadastros AS c ON p.user_id = c.user_id
+    // JOIN perfis AS pf ON c.user_id = pf.user_id
+    // LEFT JOIN postagem_comentarios AS pc ON p.post_id = pc.post_id
+    // LEFT JOIN cadastros AS cc ON pc.user_id = cc.user_id
+    // LEFT JOIN perfis AS cpf ON cc.user_id = cpf.user_id
+    // LEFT JOIN postagem_likes AS pl ON p.post_id = pl.post_id
+    // ORDER BY p.post_data DESC, pc.comentario_data ASC;
     const comments = await prisma.postagem_comentarios.findMany({
       where: { post_id: postId },
       include: {
@@ -105,7 +125,7 @@ export async function GET(
           },
         },
       },
-      orderBy: { comentario_data: "asc" }, // Ordena por data (mais antigo primeiro)
+      orderBy: { comentario_data: "asc" },
     });
 
     // Formata os comentários para o frontend
@@ -114,13 +134,13 @@ export async function GET(
       let userImage = null;
       if (comment.cadastros?.perfis?.user_image) {
         const buffer = Buffer.from(comment.cadastros.perfis.user_image);
-        userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`; // Ajuste o MIME type se necessário (ex.: image/png)
+        userImage = `data:image/jpeg;base64,${buffer.toString("base64")}`; 
       }
 
       return {
         id: comment.comentario_id,
-        user_name: comment.cadastros?.perfis?.user_name || "Usuário Anônimo", // Fallback se não houver perfil
-        user_image: userImage || null, // Fallback para imagem padrão se não houver
+        user_name: comment.cadastros?.perfis?.user_name || "Usuário Anônimo", 
+        user_image: userImage || null, 
         comentario_text: comment.comentario_text || "",
         comentario_data:
           comment.comentario_data?.toISOString() || new Date().toISOString(),

@@ -12,7 +12,9 @@ export async function GET() {
         { status: 401 }
       );
     }
-
+    // SELECT user_image FROM perfis
+    // WHERE user_id = {payload.user_id}
+    // LIMIT 1;
     const userImage = await prisma.perfis.findUnique({
       select: {
         user_image: true,
@@ -38,14 +40,9 @@ export async function GET() {
       )}`;
     }
 
-    // Assumindo que user_image é um Buffer (bytes). Converta para base64.
-    // Ajuste o tipo MIME se necessário (ex.: 'image/png' se for PNG).
-    // const base64 = userImage.user_image.toString('base64');
-    // const dataUrl = `data:image/jpeg;base64,${base64}`; // Use o tipo correto da imagem
-
     return NextResponse.json({
       success: true,
-      user_image: userImageConverted, // Retorna uma string de data URL
+      user_image: userImageConverted, 
     });
   } catch (error) {
     console.error("Erro na API:", error);

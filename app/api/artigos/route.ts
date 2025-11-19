@@ -12,7 +12,9 @@ export async function GET() {
       );
     }
 
-    // SELECT artigos_id, artigos_gender, artigos_autor, artigos_titulo, artigos_description, artigos_url FROM artigos;
+  //Busca todos os artigos
+  //SELECT artigos_id, artigos_gender, artigos_autor, artigos_titulo, artigos_description, artigos_url
+  //FROM artigos;
     const artigos = await prisma.artigos.findMany({
       select: {
         artigos_id: true,
@@ -27,6 +29,8 @@ export async function GET() {
     // Se o usuário estiver logado, verifica favoritos
     let favoritedIds: number[] = [];
     if (payload.user_id) {
+      // SELECT artigos_id FROM artigos_favoritos
+      // WHERE user_id = {payload.user_id};
       const favorites = await prisma.artigos_favoritos.findMany({
         where: { user_id: payload.user_id },
         select: { artigos_id: true },
