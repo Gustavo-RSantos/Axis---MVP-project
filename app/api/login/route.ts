@@ -9,8 +9,10 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // Busca o usuário pelo email
-    // puxa o user_id , user_mail , user_password_hash com parametro de user_mail
+    /* Busca do usuário pelo email*/
+
+    // SELECT user_id, user_mail, user_password_hash FROM cadastros
+    // WHERE user_mail = 'email'
     const user = await prisma.cadastros.findFirst({
       select: {
         user_id: true,

@@ -13,7 +13,11 @@ export async function GET() {
       );
     }
 
-    // Busca os favoritos do usuário, incluindo os detalhes do artigo
+    /*Busca dos favoritos com detalhes*/
+
+    // SELECT af.*, a.* FROM artigos_favoritos AS af
+    // JOIN artigos AS a ON af.artigos_id = a.artigos_id
+    // WHERE af.user_id = payload.user_id;
     const favorites = await prisma.artigos_favoritos.findMany({
       where: { user_id: payload.user_id },
       include: {

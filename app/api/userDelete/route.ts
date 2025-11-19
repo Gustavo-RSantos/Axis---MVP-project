@@ -9,7 +9,22 @@ export async function DELETE() {  // Ou PUT
     if (!payload) {
       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-        
+    
+    /* Deletar usuário e todos os dados relacionados*/
+
+    // DELETE FROM postagem_comentarios 
+    // WHERE user_id = payload_user_id;
+    // DELETE FROM postagem_likes 
+    // WHERE user_id = payload_user_id;
+    // DELETE FROM postagens 
+    // WHERE user_id = payload_user_id;
+    // DELETE FROM perfis 
+    // WHERE user_id = payload_user_id;
+    // DELETE FROM cadastros 
+    // WHERE user_id = payload_user_id;
+    // DELETE FROM artigos_favoritos 
+    // WHERE user_id = payload_user_id;
+
     const deleteUserPostComentarios =  prisma.postagem_comentarios.deleteMany({
         where: {
             user_id : payload.user_id
@@ -25,25 +40,24 @@ export async function DELETE() {  // Ou PUT
             user_id : payload.user_id
         },
     })
+
+    const userFavArtigos = prisma.artigos_favoritos.deleteMany({
+        where: {
+            user_id : payload.user_id
+        }
+    })
     const deleteUserPerfil = prisma.perfis.deleteMany({
         where: {
             user_id : payload.user_id
         }
     })
-    // lembrar de adicionar deleteUserFavArtigos na const deleteUserCadastro PORRA
-    // const deleteUserFavArtigos = await prisma.favorito_artigos.delete({
-    //         where: {
-    //         user_id : payload.user_id
-    //     }
-    // })
-    
     const deleteUserCadastro = prisma.cadastros.deleteMany({
         where: {
             user_id : payload.user_id
         }
     })
 
-    const deleteDadosUsuario = await prisma.$transaction([deleteUserPostComentarios , deleteUserPostLikes , deleteUserPostagens , deleteUserPerfil , deleteUserCadastro])
+    const deleteDadosUsuario = await prisma.$transaction([deleteUserPostComentarios , deleteUserPostLikes , deleteUserPostagens, userFavArtigos, deleteUserPerfil , deleteUserCadastro ])
     
     // Limpando os cookies depois de deletar o usuário
     const response = NextResponse.json({ success: true, message: "Logout realizado" });

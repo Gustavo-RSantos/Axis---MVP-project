@@ -12,6 +12,8 @@ import fs from 'fs';
 export async function createCadastro(data : dataProps) {
   try {
       // puxa o email do usuario usando como parametro o email do formulario.
+      // SELECT user_id FROM cadastros
+      // WHERE user_mail = 'email@email.com'
       const userMailAlreadyExists = await prisma.cadastros.findFirst({
       where: {
         user_mail: data.email
@@ -23,7 +25,13 @@ export async function createCadastro(data : dataProps) {
     }
 
     const hash = await bcrypt.hash(data.password, 10);
-    //create = insert / envia os seguintes dados para o banco: user_firsname, user_secondname , user_mail , user_phone , user_age , user_password_hash.
+    /*  Verificar e Cadastro do novo usuário*/
+
+    // INSERT INTO cadastros (
+    //   user_firstname, user_secondname, user_mail, user_phone, user_age, user_password_hash
+    // ) VALUES (
+    //   'PrimeiroNome', 'Sobrenome', 'email@teste.com', '999999999', 25, 'hash_da_senha'
+    // );
     const novoCadastro = await prisma.cadastros.create({
       data: {
         user_firstname: data.firstName,
@@ -69,6 +77,11 @@ export async function GET() {
           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
     // Querry para puxar os seguintes dads: user_name , user_secondname ,user_mail , user_age , perfis: user_name , user_image.
+   
+    // SELECT c.user_firstname, c.user_secondname, c.user_mail, c.user_age, p.user_name, p.user_image, cal.calendar_id, cal.calendar_consulta, cal.calendar_data FROM cadastros AS c
+    // LEFT JOIN perfis AS p ON p.user_id = c.user_id
+    // LEFT JOIN calendarios AS Cal ON cal.user_id = c.user_id
+    // WHERE user_id = payload_user_id;
     const userData = await prisma.cadastros.findUnique({
       select: {
         user_firstname: true,

@@ -9,7 +9,18 @@ export async function POST(req: Request) {  // Ou PUT
       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
     const data = await req.json();
-    // Validações básicas
+    
+    /*Atualiza dados do usuário e perfil*/
+
+    // UPDATE cadastros
+    // SET user_firstname = data.user_firstname,
+    //     user_secondname = data.user_secondname,
+    //     user_age = data.user_age
+    // WHERE user_id = payload.user_id;
+
+    // UPDATE perfis
+    // SET user_name = data.user_name
+    // WHERE user_id = payload.user_id;
     const userData = await prisma.cadastros.update({
       where: { user_id: payload.user_id },
        data: {

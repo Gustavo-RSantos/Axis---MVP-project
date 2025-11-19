@@ -10,7 +10,12 @@ export async function GET() {
           console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-    // puxa os seguintes dados : user_id , Perfis: user_name , user_image.
+    
+    /* Busca do do perfil do usuário*/
+
+    // SELECT c.user_id, p.user_name, p.user_image FROM cadastros AS c
+    // JOIN perfis AS p ON c.user_id = p.user_id
+    // WHERE c.user_id = payload_user_id;
     const userProfile = await prisma.cadastros.findUnique({
       select:{
         user_id: true,

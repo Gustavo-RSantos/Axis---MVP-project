@@ -15,7 +15,16 @@ export async function GET() {
   console.log("API GET chamada");
   try {
     const payload = await getUserFromCookie(); 
+    /*Busca postagens com comentários e likes*/
 
+// SELECT p.*, c.*, pf.*, pc.*, cc.*, cpf.*, pl.* FROM postagens AS p
+// JOIN cadastros AS c ON p.user_id = c.user_id
+// JOIN perfis AS pf ON c.user_id = pf.user_id
+// LEFT JOIN postagem_comentarios AS pc ON p.post_id = pc.post_id
+// LEFT JOIN cadastros AS cc ON pc.user_id = cc.user_id
+// LEFT JOIN perfis AS cpf ON cc.user_id = cpf.user_id
+// LEFT JOIN postagem_likes AS pl ON p.post_id = pl.post_id
+// ORDER BY p.post_data DESC, pc.comentario_data ASC;
     const posts = await prisma.postagens.findMany({
       include: {
         cadastros: {
@@ -107,7 +116,13 @@ export async function POST(request: Request) {
     // Converter arquivo para Buffer (para BLOB)
     const arrayBuffer = await post_image.arrayBuffer();
     const imageBuffer = Buffer.from(arrayBuffer);
+    /* Criação de nova postagem*/
 
+    // INSERT INTO postagens (
+    //   user_id, post_name, post_text, post_data, post_image, post_gender
+    // ) VALUES (
+    //   payload.user_id, post_name, post_text, NOW(), imageBuffer, post_gender
+    // );
     const newPost = await prisma.postagens.create({
       data: {
         user_id: payload.user_id,

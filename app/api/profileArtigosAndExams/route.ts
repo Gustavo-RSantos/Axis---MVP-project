@@ -10,7 +10,10 @@ export async function GET() {
           // console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
           return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
-    // Querry para puxar os seguintes dads: user_name , user_secondname ,user_mail , user_age , perfis: user_name , user_image.
+    /*Busca dados no calendário*/
+
+    // SELECT calendar_id, calendar_data, calendar_consulta FROM calendarios
+    // WHERE user_id = payload.user_id;
     const userData = await prisma.calendarios.findMany({
       select: {
             calendar_id: true,

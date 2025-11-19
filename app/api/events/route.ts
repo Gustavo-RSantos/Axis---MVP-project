@@ -6,7 +6,6 @@ import { getUserFromCookie } from "../../lib/auth"; // Mesmo import
 
 export async function GET() {
   try {
-    // 1. Autenticar via cookie (igual ao /api/me)
     console.log("Iniciando GET /api/events");
     const payload = await getUserFromCookie();
     console.log("Payload obtido:", payload);
@@ -21,8 +20,12 @@ export async function GET() {
       );
     }
 
-    // 2. Buscar eventos do usuário no banco
+    
     // puxa os seguintes dados: calendar_id , calendar_consulta, calendar_data usando como parametro o user_id
+    /*Busca eventos no calendário*/
+
+    // SELECT calendar_id, calendar_consulta, calendar_data FROM calendarios
+    // WHERE user_id = payload.user_id;
     const events = await prisma.calendarios.findMany({
       select: {
         calendar_id: true,
@@ -52,7 +55,6 @@ export async function GET() {
   }
 }
 
-// Opcional: Endpoint POST para criar eventos (se quiser adicionar via API)
 export async function POST(request: Request) {
   try {
     const payload = await getUserFromCookie();
@@ -85,6 +87,13 @@ export async function POST(request: Request) {
       );
     }
     // create = insert  / inserindo os seguintes dados : calendar_consulta , calendar_data , user_id.
+    /* Criação de evento no calendário*/
+
+    // INSERT INTO calendarios (
+    //   calendar_consulta, calendar_data, user_id
+    // ) VALUES (
+    //   calendar_consulta, parsedDate, payload.user_id
+    // );
     const newEvent = await prisma.calendarios.create({
       data: {
         calendar_consulta,
@@ -140,6 +149,12 @@ export async function DELETE(request: Request) {
 
     // 3. Excluir o evento (apenas se pertencer ao usuário)
     const deletedEvent = await prisma.calendarios.deleteMany({
+      /*Ecxlusão de evento no calendário*/
+
+    // DELETE FROM calendarios
+    // WHERE calendar_id = CAST(calendar_id AS UNSIGNED)
+    //   AND user_id = payload.user_id;
+
       where: {
         calendar_id: Number(calendar_id),
         user_id: payload.user_id, // Filtro de segurança

@@ -9,6 +9,7 @@ export async function GET() {
       return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
     }
 
+    // SELECT artigos_id, artigos_gender, artigos_autor, artigos_titulo, artigos_description, artigos_url FROM artigos;
     const artigos = await prisma.artigos.findMany({
       select: {
         artigos_id: true,

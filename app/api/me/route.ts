@@ -17,8 +17,13 @@ export async function GET() {
       console.log("User ID inválido:", payload.user_id);
       return NextResponse.json({ success: false, message: "Token inválido" }, { status: 400 });
     }
-    
-    // querry puxando o user_id 
+    /* Buscar Usuário pelo ID*/
+
+    /* Busca de dados completos do usuário*/
+
+    // SELECT c.user_firstname, c.user_secondname, c.user_mail, c.user_age, p.user_name, p.user_image FROM cadastros AS c
+    // JOIN perfis AS p ON c.user_id = p.user_id
+    // WHERE c.user_id = payload_user_id;
     const user = await prisma.cadastros.findUnique({
       where: { user_id: payload.user_id },
     });
