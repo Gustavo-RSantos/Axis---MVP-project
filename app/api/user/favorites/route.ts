@@ -26,19 +26,21 @@ export async function GET() {
     });
 
     // Mapeia os dados para o formato esperado pelo componente (Article)
-    const articles = favorites.map((fav) => {
-      const artigo = fav.artigos;
-      if (!artigo) return null; // Pula se artigo não existir
+    const articles = favorites
+      .map((fav) => {
+        const artigo = fav.artigos;
+        if (!artigo) return null; // Pula se artigo não existir
 
-      return {
-        id: artigo.artigos_id,
-        title: artigo.artigos_titulo || "Título não disponível",
-        author: artigo.artigos_autor || "Autor não disponível",
-        description: artigo.artigos_description || "Descrição não disponível",
-        gender: artigo.artigos_gender || "Gênero não disponível",
-        url: artigo.artigos_url || "#",
-      };
-    }).filter(Boolean); // Remove nulls
+        return {
+          id: artigo.artigos_id,
+          title: artigo.artigos_titulo || "Título não disponível",
+          author: artigo.artigos_autor || "Autor não disponível",
+          description: artigo.artigos_description || "Descrição não disponível",
+          gender: artigo.artigos_gender || "Gênero não disponível",
+          url: artigo.artigos_url || "#",
+        };
+      })
+      .filter(Boolean); // Remove nulls
 
     return NextResponse.json({ success: true, articles });
   } catch (error) {

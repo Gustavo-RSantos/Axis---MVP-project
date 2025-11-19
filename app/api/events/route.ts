@@ -20,7 +20,6 @@ export async function GET() {
       );
     }
 
-    
     // puxa os seguintes dados: calendar_id , calendar_consulta, calendar_data usando como parametro o user_id
     /*Busca eventos no calendário*/
 
@@ -106,7 +105,9 @@ export async function POST(request: Request) {
     const responseEvent = {
       calendar_id: newEvent.calendar_id,
       calendar_consulta: newEvent.calendar_consulta,
-      calendar_date: newEvent.calendar_data ? newEvent.calendar_data.toISOString() : null, // Padrão ISO na resposta
+      calendar_date: newEvent.calendar_data
+        ? newEvent.calendar_data.toISOString()
+        : null, // Padrão ISO na resposta
     };
 
     return NextResponse.json({ success: true, event: responseEvent });
@@ -121,7 +122,6 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-
     // 1. Autenticar via cookie
     const payload = await getUserFromCookie();
     if (
@@ -151,9 +151,9 @@ export async function DELETE(request: Request) {
     const deletedEvent = await prisma.calendarios.deleteMany({
       /*Ecxlusão de evento no calendário*/
 
-    // DELETE FROM calendarios
-    // WHERE calendar_id = CAST(calendar_id AS UNSIGNED)
-    //   AND user_id = payload.user_id;
+      // DELETE FROM calendarios
+      // WHERE calendar_id = CAST(calendar_id AS UNSIGNED)
+      //   AND user_id = payload.user_id;
 
       where: {
         calendar_id: Number(calendar_id),

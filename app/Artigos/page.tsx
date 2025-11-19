@@ -13,11 +13,7 @@ import {
   SelectValue,
 } from "../components/ui/Select";
 
-import bannerFitness from "../assets/imagensArtigos/imagemArtigosFitness.png";
-import bannerNutricao from "../assets/imagensArtigos/imagemArtigosNutrição.png";
-import bannerBemEstar from "../assets/imagensArtigos/imagemArtigosBemStar.png";
 import bannerSaudeMental from "../assets/imagensArtigos/imagemArtigosSaúdeMental.png";
-import bannerSono from "../assets/imagensArtigos/imagemArtigosSono.png";
 import bannerEnvelhecimento from "../assets/imagensArtigos/bannerEnvelhecimento.jpg";
 import bannerSaudeFisica from "../assets/imagensArtigos/bannerSaudeFisica.jpg";
 import bannerSaudeIntelectual from "../assets/imagensArtigos/bannerSaudeIntelectual.jpg";
@@ -47,11 +43,7 @@ interface Article {
 }
 
 const genderColors: Record<string, string> = {
-  Fitness: "from-orange-500 to-red-500",
-  Nutrição: "from-green-500 to-emerald-500",
-  "Bem-estar": "from-purple-500 to-pink-500",
   "Saúde Mental": "from-blue-500 to-cyan-500",
-  Sono: "from-indigo-500 to-purple-500",
   Envelhecimento: "from-amber-500 to-yellow-600",
   "Saúde Preventiva": "from-teal-500 to-emerald-500",
   "Saúde Pública": "from-blue-600 to-sky-400",
@@ -63,22 +55,14 @@ const genderColors: Record<string, string> = {
 export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGender, setSelectedGender] = useState<string>("all");
-  const [articles, setArticles] = useState<Article[]>([]); // Estado para os artigos
-  const [loading, setLoading] = useState(true); // Estado para loading
-  const [error, setError] = useState<string | null>(null); // Estado para erro
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   function getDefaultImage(gender: string): string {
     switch (gender.toLowerCase()) {
-      case "fitness":
-        return bannerFitness.src;
-      case "nutrição":
-        return bannerNutricao.src;
-      case "bem-estar":
-        return bannerBemEstar.src;
       case "saúde mental":
         return bannerSaudeMental.src;
-      case "sono":
-        return bannerSono.src;
       case "envelhecimento":
         return bannerEnvelhecimento.src;
       case "saúde física":
@@ -92,16 +76,17 @@ export default function App() {
       case "vício":
         return bannerVicio.src;
       default:
-        return bannerFitness.src; // Imagem genérica para gêneros não previstos
+        return bannerSaudePublica.src;
     }
   }
 
+  // Fetch para todos os artigos do banco
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await fetch("/api/artigos", {
           method: "GET",
-          credentials: "include", // Se precisar de autenticação
+          credentials: "include",
         });
         if (!response.ok) {
           throw new Error("Erro ao buscar artigos");
@@ -109,7 +94,7 @@ export default function App() {
         const data = await response.json();
 
         if (data.success) {
-          // Mapeie os dados da API para o formato esperado
+          // Mapeamento dos dados dos Artigos para uso
           const mappedArticles: Article[] = data.artigos.map(
             (artigo: ApiArticle) => ({
               id: artigo.artigos_id,
@@ -117,12 +102,13 @@ export default function App() {
               author: artigo.artigos_autor,
               description: artigo.artigos_description,
               gender: artigo.artigos_gender,
-              image: artigo.artigos_image === undefined
-              ? getDefaultImage(artigo.artigos_gender)
-              : artigo.artigos_image,
+              image:
+                artigo.artigos_image === undefined
+                  ? getDefaultImage(artigo.artigos_gender)
+                  : artigo.artigos_image,
               date: new Date().toISOString().split("T")[0],
               url: artigo.artigos_url,
-              isFavorited: artigo.isFavorited || false, // Use o campo da API
+              isFavorited: artigo.isFavorited || false,
             })
           );
           console.log(mappedArticles);
@@ -234,38 +220,6 @@ export default function App() {
                   >
                     Todos os gêneros
                   </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
-                    value="Fitness"
-                  >
-                    Fitness
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
-                    value="Nutrição"
-                  >
-                    Nutrição
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
-                    value="Bem-estar"
-                  >
-                    Bem-estar
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
-                    value="Saúde Mental"
-                  >
-                    Saúde Mental
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
-                    value="Sono"
-                  >
-                    Sono
-                  </SelectItem>
-
-                  {/* Novos gêneros adicionados */}
                   <SelectItem
                     className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
                     value="Envelhecimento"

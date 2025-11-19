@@ -3,8 +3,8 @@ import prisma from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-   request: NextRequest,
-   context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getUserFromCookie();
@@ -15,7 +15,6 @@ export async function POST(
       );
     }
 
-    
     const { id } = await context.params;
     const postId = parseInt(id, 10);
     if (isNaN(postId) || postId <= 0) {

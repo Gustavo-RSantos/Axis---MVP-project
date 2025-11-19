@@ -7,28 +7,36 @@ export async function GET() {
     const payload = await getUserFromCookie();
 
     if (!payload) {
-      return NextResponse.json({ success: false, message: "Não autenticado" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Não autenticado" },
+        { status: 401 }
+      );
     }
 
     const userImage = await prisma.perfis.findUnique({
       select: {
-        user_image: true
+        user_image: true,
       },
       where: {
-        user_id: payload.user_id
-      }
+        user_id: payload.user_id,
+      },
     });
 
     if (!userImage || !userImage.user_image) {
-      return NextResponse.json({ success: false, message: "Imagem não encontrada" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Imagem não encontrada" },
+        { status: 404 }
+      );
     }
 
     let userImageConverted = null;
 
     if (userImage?.user_image) {
-        const buffer = Buffer.from(userImage?.user_image);
-        userImageConverted = `data:image/jpeg;base64,${buffer.toString("base64")}`;
-      }
+      const buffer = Buffer.from(userImage?.user_image);
+      userImageConverted = `data:image/jpeg;base64,${buffer.toString(
+        "base64"
+      )}`;
+    }
 
     // Assumindo que user_image é um Buffer (bytes). Converta para base64.
     // Ajuste o tipo MIME se necessário (ex.: 'image/png' se for PNG).

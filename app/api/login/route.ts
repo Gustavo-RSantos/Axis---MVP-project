@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
@@ -17,10 +17,10 @@ export async function POST(req: Request) {
       select: {
         user_id: true,
         user_mail: true,
-        user_password_hash: true, 
+        user_password_hash: true,
       },
-      where: { 
-        user_mail: email 
+      where: {
+        user_mail: email,
       },
     });
 
@@ -31,11 +31,11 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("Passou o Email")
+    console.log("Passou o Email");
     // console.log(password)
-    
+
     // Comparando a senha enviada com o hash do banco
-    const isValid = await bcrypt.compare(password, user.user_password_hash); 
+    const isValid = await bcrypt.compare(password, user.user_password_hash);
     if (!isValid) {
       return NextResponse.json(
         { success: false, message: "Senha incorreta" },
@@ -48,13 +48,15 @@ export async function POST(req: Request) {
     //console.log("Token gerado: " + token)
 
     // Criando resposta
-    const response = NextResponse.json({ success: true, message: "Login bem-sucedido" });
+    const response = NextResponse.json({
+      success: true,
+      message: "Login bem-sucedido",
+    });
 
     // Setando cookie de autenticação (pass the response)
     setAuthCookie(token, response);
 
     return response;
-
   } catch (err) {
     console.error("Erro no login:", err);
     return NextResponse.json(

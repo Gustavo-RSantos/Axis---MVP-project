@@ -63,7 +63,7 @@ export default function App() {
     setShowModal(false);
     setNewEvent({
       calendar_consulta: "",
-      calendar_hour: "", 
+      calendar_hour: "",
       calendar_date: "",
       calendar_id: 0,
     });
@@ -78,12 +78,12 @@ export default function App() {
     });
   };
 
-  function handleChangeHour(event: React.ChangeEvent<HTMLInputElement>):void{
+  function handleChangeHour(event: React.ChangeEvent<HTMLInputElement>): void {
     setNewEvent({
       ...newEvent,
       calendar_hour: event.target.value,
     });
-  };
+  }
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -148,7 +148,6 @@ export default function App() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-
       // Combina data e hora em uma única Date
       let combinedDate: Date;
       if (newEvent.calendar_date instanceof Date) {
@@ -157,8 +156,8 @@ export default function App() {
         combinedDate = new Date(newEvent.calendar_date);
       }
       if (newEvent.calendar_hour) {
-        const [hours, minutes] = newEvent.calendar_hour.split(':').map(Number);
-        combinedDate.setHours(hours, minutes, 0, 0);  // Define horas, minutos, segundos e milissegundos
+        const [hours, minutes] = newEvent.calendar_hour.split(":").map(Number);
+        combinedDate.setHours(hours, minutes, 0, 0); // Define horas, minutos, segundos e milissegundos
       }
 
       // Converta para ISO string

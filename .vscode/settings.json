@@ -14,5 +14,6 @@
             "username": "admin",
             "name": "axis-db"
         }
-    ]
+    ],
+    "prisma.pinToPrisma6": true
 }
