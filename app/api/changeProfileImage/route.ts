@@ -32,7 +32,6 @@ export async function POST(req: Request) {
       );
     }
     if (file.size > 5 * 1024 * 1024) {
-      // Exemplo: máximo 5MB
       return NextResponse.json(
         { success: false, message: "Arquivo muito grande (máx. 5MB)." },
         { status: 400 }
@@ -44,8 +43,6 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Atualizar no banco (assumindo coluna 'user_image' na tabela 'perfis' como Bytes)
-
-    /* Atualiza a imagem do perfil do usuário*/
 
     // UPDATE perfis
     // SET user_image = buffer

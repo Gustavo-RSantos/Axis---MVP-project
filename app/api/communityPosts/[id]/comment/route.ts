@@ -29,18 +29,8 @@ export async function POST(
         { status: 400 }
       );
     }
-    // INSERT INTO postagem_comentarios (
-    //   post_id,
-    //   user_id,
-    //   comentario_text,
-    //   comentario_data
-    // )
-    // VALUES (
-    //   {post_id},
-    //   {user-id},
-    //   {comentario_text},
-    //   {new Date()}
-    // );
+    // INSERT INTO postagem_comentarios ( post_id, user_id, comentario_text, comentario_data)
+    // VALUES ( {post_id}, {user-id}, {comentario_text}, {new Date()});
 
     const newComment = await prisma.postagem_comentarios.create({
       data: {

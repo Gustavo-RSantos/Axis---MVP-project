@@ -36,6 +36,9 @@ export async function POST(
     }
 
     // Verifica se o like já existe
+    // SELECT * FROM postagem_likes
+    // WHERE = post_id = postId AND
+    // user_id = payload.user_id;
     const existingLike = await prisma.postagem_likes.findFirst({
       where: {
         post_id: postId,
@@ -44,13 +47,22 @@ export async function POST(
     });
 
     if (existingLike) {
+      
       // Remove o like
+      // DELETE FROM postagem_likes
+      // WHERE id_like = existingLike.id_like;
       await prisma.postagem_likes.delete({
         where: { id_like: existingLike.id_like },
       });
       return NextResponse.json({ success: true, liked: false });
     } else {
+
       // Adiciona o like
+      // INSERT INTO postagem_likes (
+      //   post_id, user_id, data like
+      // ) VALUES (
+      //   postId, payload.user_id, NOW()
+      // );
       await prisma.postagem_likes.create({
         data: {
           post_id: postId,
