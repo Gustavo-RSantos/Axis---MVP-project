@@ -1,30 +1,34 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import CarrocelTeste from "@/public/Carrocel_teste.jpg";
 import { ChevronLeft, ChevronRight } from "lucide-react"
+
+import firstBanner from '../../assets/imagensCarrocel/firstBanner.jpg'
+import secondBanner from '../../assets/imagensCarrocel/secondBanner.jpg'
+import thirdBanner from '../../assets/imagensCarrocel/thirdBanner.jpg'
+import fourthBanner from '../../assets/imagensCarrocel/fourthBanner.jpg'
 
 const slides = [
   {
     id: 1,
-    image: CarrocelTeste.src, // Correção: use .src para pegar a string do import
+    image: firstBanner.src,
     title: "Pratique atividade física regularmente",
     subtitle: "Fortaleça seu corpo e melhore sua saúde masculina",
   },
   {
     id: 2,
-    image: CarrocelTeste.src,
+    image: secondBanner.src,
     title: "Mexa-se para um coração saudável",
     subtitle: "Reduza os riscos cardiovasculares com exercícios diários",
   },
   {
     id: 3,
-    image: CarrocelTeste,
+    image: thirdBanner.src,
     title: "Atividade física aumenta a disposição",
     subtitle: "Mais energia para enfrentar os desafios do dia a dia",
   },
   {
     id: 4,
-    image: CarrocelTeste.src,
+    image: fourthBanner.src,
     title: "Cuide da saúde mental com exercícios",
     subtitle: "Atividades físicas ajudam a reduzir o estresse e a ansiedade",
   },
@@ -70,10 +74,7 @@ export default function Carousel() {
             className="object-cover w-full h-full"
             priority={index === 0} 
           />
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-center px-4 md:px-10 py-20">
-            <p className="text-white text-sm md:text-base mb-2 uppercase tracking-widest font-light">
-              Frase sobre a importância da atividade física
-            </p>
+          <div className="absolute inset-0 bg-opacity-40 flex flex-col justify-center items-center text-center px-4 md:px-10 py-20">
             <h2 className="text-white text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
               {slide.title}
             </h2>
