@@ -121,7 +121,7 @@ export default function Cadastro() {
     }
   }
 
-  // Handler específico para o campo de senha (chama a avaliação de força)
+  // Handler para chamar a avaliação da força da senha
   function handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
     console.log("handlePasswordChange chamado, valor:", event.target.value);
     handleChange(event);

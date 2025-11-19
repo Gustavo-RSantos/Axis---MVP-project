@@ -51,17 +51,21 @@ export async function POST(
           artigos_fav_id: existingFavorite.artigos_fav_id,
         },
       });
-      console.log(`Favorito removido: user_id=${payload.user_id}, artigos_id=${artigo_id}`);
+      console.log(
+        `Favorito removido: user_id=${payload.user_id}, artigos_id=${artigo_id}`
+      );
       return NextResponse.json({ success: true, favorited: false });
     } else {
-      // Adiciona o favorito 
+      // Adiciona o favorito
       await prisma.artigos_favoritos.create({
         data: {
           artigos_id: artigo_id,
           user_id: payload.user_id,
         },
       });
-      console.log(`Favorito adicionado: user_id=${payload.user_id}, artigos_id=${artigo_id}`);
+      console.log(
+        `Favorito adicionado: user_id=${payload.user_id}, artigos_id=${artigo_id}`
+      );
       return NextResponse.json({ success: true, favorited: true });
     }
   } catch (error) {
