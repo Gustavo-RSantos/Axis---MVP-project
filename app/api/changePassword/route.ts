@@ -13,7 +13,11 @@ export async function POST(req: Request) {
     const novaSenha = await req.json();
     
     const hash = await bcrypt.hash(novaSenha.user_password_hash, 10);
-    // Validações básicas
+    //Troca de senha do usuário
+    // UPDATE cadastros
+    // SET user_password_hash = 'hash'
+    // WHERE user_id = payload.user_id;
+    
     const userPassword = await prisma.cadastros.update({
       where: { user_id: payload.user_id },
         data: { user_password_hash: hash }

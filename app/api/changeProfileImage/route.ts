@@ -31,6 +31,12 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Atualizar no banco (assumindo coluna 'user_image' na tabela 'perfis' como Bytes)
+    
+    /* Atualiza a imagem do perfil do usuário*/
+
+    // UPDATE perfis
+    // SET user_image = buffer
+    // WHERE user_id = payload.user_id;
     const updatedUser = await prisma.perfis.update({
       where: { user_id: payload.user_id },
       data: { user_image: buffer },  // Salva como BLOB
