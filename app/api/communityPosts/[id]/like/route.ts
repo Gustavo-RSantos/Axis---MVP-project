@@ -23,10 +23,8 @@ export async function POST(
         { status: 400 }
       );
     }
-
-    // Verifica se o post existe (opcional, mas recomendado)
     const postExists = await prisma.postagens.findUnique({
-      where: { post_id: postId }, // Ajuste o nome da tabela/coluna se necessário
+      where: { post_id: postId }, 
     });
     if (!postExists) {
       return NextResponse.json(

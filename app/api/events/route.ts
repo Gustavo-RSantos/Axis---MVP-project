@@ -1,8 +1,8 @@
 "use server";
 
 import { NextResponse } from "next/server";
-import prisma from "../../lib/prisma"; // Mesmo import do /api/me
-import { getUserFromCookie } from "../../lib/auth"; // Mesmo import
+import prisma from "../../lib/prisma"; 
+import { getUserFromCookie } from "../../lib/auth";
 
 export async function GET() {
   try {
@@ -20,7 +20,6 @@ export async function GET() {
       );
     }
 
-    // puxa os seguintes dados: calendar_id , calendar_consulta, calendar_data usando como parametro o user_id
     /*Busca eventos no calendário*/
 
     // SELECT calendar_id, calendar_consulta, calendar_data FROM calendarios
@@ -33,17 +32,16 @@ export async function GET() {
       },
       where: { user_id: payload.user_id },
     });
-    console.log("Eventos encontrados:", events); // Verifique se a query funciona
+    console.log("Eventos encontrados:", events); 
 
     const formattedEvents = events.map((event) => ({
       calendar_id: event.calendar_id,
-      calendar_consulta: event.calendar_consulta || "", // Trata null
+      calendar_consulta: event.calendar_consulta || "",
       calendar_date: event.calendar_data
         ? event.calendar_data.toISOString()
-        : null, // Converte para ISO
+        : null, 
     }));
 
-    // 3. Retornar eventos em formato compatível com FullCalendar
     return NextResponse.json({ success: true, events: formattedEvents });
   } catch (error) {
     console.error("Erro ao buscar eventos:", error);

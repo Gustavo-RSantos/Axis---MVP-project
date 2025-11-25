@@ -36,7 +36,6 @@ export async function GET() {
       },
     });
 
-    // console.log(userProfile)
 
     if (!userProfile) {
       return NextResponse.json(
@@ -46,11 +45,8 @@ export async function GET() {
     }
 
     const userImageArray = userProfile?.perfis?.user_image
-      ? Array.from(userProfile.perfis.user_image) // Garante que seja [number, ...]
+      ? Array.from(userProfile.perfis.user_image)  
       : null;
-    // console.log("userImageArray para retorno:", userImageArray);
-
-    // console.log("Usuário encontrado e retornado com sucesso.");
 
     return new Response(
       JSON.stringify({

@@ -52,7 +52,9 @@ export async function createCadastro(data: dataProps) {
     console.log("Arquivo existe?", fs.existsSync(imagemPadraoPath));
 
     const imagemBytes = fs.readFileSync(imagemPadraoPath); // Buffer de bytes
-
+    /*Criação do perfil do usuário*/
+    // INSERT INTO perfis (user_id, user_name, user_image)
+    // VALUES (novoCadastro.user_id, CONCAT('Axis #', novoCadastro.user_id), imagemBytes);
     await prisma.perfis.create({
       data: {
         user_id: novoCadastro.user_id,
@@ -74,7 +76,6 @@ export async function GET() {
     const payload = await getUserFromCookie();
 
     if (!payload) {
-      // console.log("Payload é null - retornando 401. Verifique se o cookie foi enviado.");
       return NextResponse.json(
         { success: false, message: "Não autenticado" },
         { status: 401 }
@@ -119,17 +120,8 @@ export async function GET() {
     }
 
     const userImageArray = userData?.perfis?.user_image
-      ? Array.from(userData.perfis.user_image) // Garante que seja [number, ...]
+      ? Array.from(userData.perfis.user_image) 
       : null;
-    // console.log("userImageArray para retorno:", userImageArray);
-
-    // console.log("Usuário encontrado e retornado com sucesso.");
-
-    // console.log("Usuário encontrado e retornado com sucesso.");
-
-    //  console.log("User ID do payload:", payload.user_id);
-    //  console.log("Dados do usuário encontrados:", userData);
-    //  console.log("Calendarios retornados:", userData?.calendarios);
 
     return new Response(
       JSON.stringify({

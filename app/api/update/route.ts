@@ -33,10 +33,10 @@ export async function POST(req: Request) {  // Ou PUT
           }
         }
       },
-      include: { perfis: true }  // Inclua perfis na resposta para acessar user_name
+      include: { perfis: true }  
     });
 
-    console.log("Dados atualizados:", userData); // Log para confirmar atualização
+    console.log("Dados atualizados:", userData); 
     return NextResponse.json({ success: true, user: userData });
   } catch (error) {
     console.error("Erro ao atualizar:", error);

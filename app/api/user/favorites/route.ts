@@ -21,15 +21,14 @@ export async function GET() {
     const favorites = await prisma.artigos_favoritos.findMany({
       where: { user_id: payload.user_id },
       include: {
-        artigos: true, // Relação com artigos
+        artigos: true, 
       },
     });
 
-    // Mapeia os dados para o formato esperado pelo componente (Article)
     const articles = favorites
       .map((fav) => {
         const artigo = fav.artigos;
-        if (!artigo) return null; // Pula se artigo não existir
+        if (!artigo) return null; 
 
         return {
           id: artigo.artigos_id,
@@ -40,7 +39,7 @@ export async function GET() {
           url: artigo.artigos_url || "#",
         };
       })
-      .filter(Boolean); // Remove nulls
+      .filter(Boolean);
 
     return NextResponse.json({ success: true, articles });
   } catch (error) {

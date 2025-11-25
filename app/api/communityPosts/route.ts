@@ -10,7 +10,6 @@ export interface PostDataProps {
   post_gender: string;
 }
 
-// GET: Buscar todos os posts com comentários e likes
 export async function GET() {
   console.log("API GET chamada");
   try {
@@ -47,7 +46,6 @@ export async function GET() {
       orderBy: { post_data: "desc" },
     });
 
-    // Mapear para o formato esperado pelo frontend
     const formattedPosts = posts.map((post) => ({
       id: post.post_id,
       user_name: post.cadastros?.perfis?.user_name || "Anônimo",
@@ -64,7 +62,7 @@ export async function GET() {
       image: post.post_image
         ? `data:image/jpeg;base64,${Buffer.from(post.post_image).toString(
             "base64"
-          )}` // Força conversão para Buffer e depois base64
+          )}` 
         : null,
       gender: post.post_gender || "",
       likes: post.postagem_likes.length,
@@ -81,7 +79,7 @@ export async function GET() {
       })),
       curtido: payload?.user_id
         ? post.postagem_likes.some((like) => like.user_id === payload.user_id)
-        : false, // Verifica se o usuário atual deu like
+        : false, 
     }));
 
     return NextResponse.json({ success: true, posts: formattedPosts });
@@ -94,7 +92,7 @@ export async function GET() {
   }
 }
 
-// POST: Criar um novo post
+// Criar um novo post
 export async function POST(request: Request) {
   try {
     const payload = await getUserFromCookie();
@@ -133,7 +131,6 @@ export async function POST(request: Request) {
       );
     }
     if (post_image.size > 12 * 1024 * 1024) {
-      // Exemplo: máximo 12MB
       return NextResponse.json(
         { success: false, message: "Arquivo muito grande (máx. 12MB)." },
         { status: 400 }
@@ -155,7 +152,7 @@ export async function POST(request: Request) {
         user_id: payload.user_id,
         post_name: post_name || null,
         post_text,
-        post_data: new Date(), // Converte string para Date
+        post_data: new Date(), 
         post_image: imageBuffer,
         post_gender: post_gender || null,
       },

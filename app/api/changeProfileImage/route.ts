@@ -38,7 +38,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Converter arquivo para Buffer (para BLOB)
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
