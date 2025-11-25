@@ -21,7 +21,13 @@ import Textarea from "../components/ui/TextArea";
 import Card from "../components/ui/Post_Card";
 import Image from "next/image";
 import InputRef from "../components/ui/InputRef";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/Select";
 interface Comentario {
   id: number;
   user_name: string;
@@ -54,6 +60,13 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const [userImage, setUserImage] = useState<string>("");
+  const [selectedGender, setSelectedGender] = useState<string>("Geral");
+  const [filterGender, setFilterGender] = useState<string>("Geral");
+
+  const filteredPosts = posts.filter((post) => {
+    if (filterGender === "Geral") return true; // Mostra todos
+    return post.gender === filterGender; // Filtra por gênero específico
+  });
 
   const postInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +93,20 @@ export default function App() {
     fetchPosts();
   }, []);
 
+  const getBadgeColor = (gender: string) => {
+    const colors: { [key: string]: string } = {
+      Geral: "bg-linear-to-r from-gray-100 to-gray-200 text-gray-700",
+      Fitness: "bg-linear-to-r from-orange-100 to-red-100 text-orange-700",
+      Nutrição: "bg-linear-to-r from-green-100 to-emerald-100 text-green-700",
+      "Bem-estar": "bg-linear-to-r from-purple-100 to-pink-100 text-purple-700",
+      "Saúde Mental": "bg-linear-to-r from-blue-100 to-cyan-100 text-blue-700",
+      Sono: "bg-linear-to-r from-indigo-100 to-purple-100 text-indigo-700",
+    };
+    return (
+      colors[gender] || "bg-linear-to-r from-teal-100 to-cyan-100 text-teal-700"
+    ); // Fallback para teal se gênero não mapeado
+  };
+
   useEffect(() => {
     async function fetchUserImage() {
       try {
@@ -92,14 +119,14 @@ export default function App() {
         const userImageData = await response.json();
 
         if (userImageData.success && userImageData.user_image) {
-          setUserImage(userImageData.user_image); // Agora é uma string (URL ou data URL)
+          setUserImage(userImageData.user_image);
         } else {
           console.error("Erro: Imagem não encontrada");
-          setUserImage(""); // Ou defina um placeholder
+          setUserImage("");
         }
       } catch (error) {
         console.error("Erro ao buscar imagem do usuário:", error);
-        setUserImage(""); // Fallback
+        setUserImage("");
       }
     }
     fetchUserImage();
@@ -233,7 +260,6 @@ export default function App() {
 
   const handleSubmitPost = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Captura o valor diretamente do textarea via ref (opcional, pois FormData já pega)
     const postText = postTextAreaRef.current?.value.trim();
     if (!postText) return;
     const formData = new FormData(event.target as HTMLFormElement);
@@ -261,13 +287,13 @@ export default function App() {
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
-      // Validação básica: apenas imagens, tamanho máximo 5MB
+      // Validação básica: apenas imagens, tamanho máximo 12MB
       if (!file.type.startsWith("image/")) {
         alert("Por favor, selecione um arquivo de imagem válido.");
         return;
       }
       if (file.size > 12 * 1024 * 1024) {
-        // 5MB
+        // 12MB
         alert("A imagem deve ter no máximo 12MB.");
         return;
       }
@@ -373,34 +399,45 @@ export default function App() {
               <div className="space-y-2">
                 {[
                   {
+                    name: "Geral",
+                    color: "from-gray-500 to-gray-600", // Cor neutra para "Geral"
+                    count: posts.length, // Total de posts
+                  },
+                  {
                     name: "Fitness",
                     color: "from-orange-500 to-red-500",
-                    count: 145,
+                    count: posts.filter((p) => p.gender === "Fitness").length,
                   },
                   {
                     name: "Nutrição",
                     color: "from-green-500 to-emerald-500",
-                    count: 98,
+                    count: posts.filter((p) => p.gender === "Nutrição").length,
                   },
                   {
                     name: "Bem-estar",
                     color: "from-purple-500 to-pink-500",
-                    count: 127,
+                    count: posts.filter((p) => p.gender === "Bem-estar").length,
                   },
                   {
                     name: "Saúde Mental",
                     color: "from-blue-500 to-cyan-500",
-                    count: 86,
+                    count: posts.filter((p) => p.gender === "Saúde Mental")
+                      .length,
                   },
                   {
                     name: "Sono",
                     color: "from-indigo-500 to-purple-500",
-                    count: 62,
+                    count: posts.filter((p) => p.gender === "Sono").length,
                   },
                 ].map((cat) => (
                   <button
                     key={cat.name}
-                    className="group w-full text-left px-4 py-3 rounded-xl hover:bg-linear-to-r hover:from-teal-50 hover:to-cyan-50 text-slate-700 transition-all hover:shadow-md hover:scale-[1.02] flex items-center justify-between"
+                    onClick={() => setFilterGender(cat.name)} // Define o filtro ao clicar
+                    className={`group w-full text-left px-4 py-3 rounded-xl hover:bg-linear-to-r hover:from-teal-50 hover:to-cyan-50 text-slate-700 transition-all hover:shadow-md hover:scale-[1.02] flex items-center justify-between ${
+                      filterGender === cat.name
+                        ? "bg-linear-to-r from-teal-100 to-cyan-100 shadow-md scale-[1.02]" // Destaque para ativo
+                        : ""
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -427,7 +464,7 @@ export default function App() {
             >
               <Card className="p-5 bg-white/90 backdrop-blur-sm border-slate-200 shadow-lg">
                 <form onSubmit={handleSubmitPost}>
-                  <div className="flex content-center justify-center mb-4 gap-3">
+                  <div className="flex content-center justify-center mb-4 items-center gap-3">
                     <div className="w-11 h-11">
                       <Image
                         width={100}
@@ -444,9 +481,60 @@ export default function App() {
                       ref={postInputRef}
                       placeholder="Digite o titulo da postagem"
                       maxLength={50}
-                      className="w-[90%] h-11 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
+                      className="w-[70%] h-10 border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50"
                     />
+                    <Select
+                      value={selectedGender}
+                      onValueChange={setSelectedGender}
+                    >
+                      <SelectTrigger className="w-[185px] border-slate-200 focus:border-teal-500 focus:ring-teal-500 bg-slate-50">
+                        <SelectValue placeholder="Filtrar por gênero" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-0 shadow-md">
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Geral"
+                        >
+                          Geral
+                        </SelectItem>
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Fitness"
+                        >
+                          Fitness
+                        </SelectItem>
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Nutrição"
+                        >
+                          Nutrição
+                        </SelectItem>
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Bem-estar"
+                        >
+                          Bem-estar
+                        </SelectItem>
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Saúde Mental"
+                        >
+                          Saúde Mental
+                        </SelectItem>
+                        <SelectItem
+                          className="cursor-pointer focus:bg-gray-100 hover:bg-gray-100"
+                          value="Sono"
+                        >
+                          Sono
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
+                  <input
+                    type="hidden"
+                    name="post_gender"
+                    value={selectedGender}
+                  />
                   <div>
                     <Textarea
                       name="post_text"
@@ -488,7 +576,7 @@ export default function App() {
             </motion.div>
 
             {/* Posts */}
-            {posts.map((post, index) => (
+            {filteredPosts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ y: 40, opacity: 0 }}
@@ -513,7 +601,7 @@ export default function App() {
                           <p className="text-slate-900">{post.user_name}</p>
                           <Badge
                             variant="secondary"
-                            className="bg-linear-to-r from-teal-100 to-cyan-100 text-teal-700 border-0"
+                            className={`border-0 ${getBadgeColor(post.gender)}`}
                           >
                             {post.gender}
                           </Badge>
